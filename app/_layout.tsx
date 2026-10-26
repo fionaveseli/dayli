@@ -13,6 +13,7 @@ import {
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
+import { PlanProvider } from '../src/store';
 import { ThemeProvider, useTheme } from '../src/theme';
 
 function Shell() {
@@ -40,7 +41,9 @@ export default function RootLayout() {
   if (!loaded) return null;
   return (
     <ThemeProvider>
-      <Shell />
+      <PlanProvider>
+        <Shell />
+      </PlanProvider>
     </ThemeProvider>
   );
 }
