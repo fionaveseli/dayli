@@ -9,7 +9,6 @@ for copy, and for the logic. Port behaviour from its pure functions (`dayInfo`, 
 `cutFixed`, `rolloverPlan`, `parseReminder`) rather than inventing new rules.
 
 ## Stack
-
 - Expo (React Native, TypeScript, Expo Router), one codebase for iOS and Android.
 - Supabase for accounts, data and Edge Functions (the AI parsing runs in an Edge Function).
 - `expo-notifications` for reminders, scheduled on the device.
@@ -17,7 +16,6 @@ for copy, and for the logic. Port behaviour from its pure functions (`dayInfo`, 
 - The desktop website is only an informative page about the app (`/site`), not the app.
 
 ## How each work session runs
-
 1. Read `TASKS.md`. Do the first task that is not ticked and not marked **[needs you]**. Do only that one task.
 2. If the previous task's pull request is still open, do not start a new task: address its review comments, push, and stop.
 3. Work on a new branch named `task-NN-short-name`. Never commit to `main`.
@@ -29,7 +27,6 @@ for copy, and for the logic. Port behaviour from its pure functions (`dayInfo`, 
    explain exactly what is needed in the pull request, and stop.
 
 ## Rules
-
 - Never commit secrets. Keys go in `.env` (git-ignored) or Supabase secrets. The repo is public.
   Only the Supabase URL and anon key may use the `EXPO_PUBLIC_` prefix.
 - No AI attribution anywhere: no `Co-Authored-By` lines, no "Generated with" footers, no session links,
