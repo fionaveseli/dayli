@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Dayli",
+    "slug": "dayli",
+    "scheme": "dayli",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": { "supportsTablet": false, "bundleIdentifier": "app.dayli.mobile" },
+    "android": { "package": "app.dayli.mobile" },
+    "plugins": ["expo-router"],
+    "experiments": { "typedRoutes": true }
+  }
+}

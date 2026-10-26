@@ -5,6 +5,7 @@ web-build/
 ios/
 android/
 *.log
+*.tsbuildinfo
 .env
 .env.*
 !.env.example
