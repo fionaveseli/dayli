@@ -11,7 +11,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 ## Foundation
 
 - [x] **01 Expo project.** TypeScript, Expo Router, bottom tabs (Today, Calendar, Add, Tasks, More), ESLint, Prettier, Jest. Runs in Expo Go with empty screens. `.gitignore` covers `.env` and build output.
-- [ ] **02 Theme and base components.** Tokens from `design/prototype.html` (light and dark colours, type scale, spacing, radii). Load Newsreader and Figtree. Text, Button, Chip, Segmented control, Checkbox, Card, Toggle.
+- [x] **02 Theme and base components.** Tokens from `design/prototype.html` (light and dark colours, type scale, spacing, radii). Load Newsreader and Figtree. Text, Button, Chip, Segmented control, Checkbox, Card, Toggle.
 - [ ] **03 Data and rules.** Types and sample data (tasks, fixed commitments, reminders) matching the prototype. Port `dayInfo`, `gapsOn`, `loadOf`, `remOn`, `cutFixed`, `rolloverPlan`, `parseReminder` with unit tests. A small local store (Zustand or React context) persisted with AsyncStorage.
 
 ## Today
