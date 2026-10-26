@@ -13,7 +13,8 @@ for copy, and for the logic. Port behaviour from its pure functions (`dayInfo`, 
 - Supabase for accounts, data and Edge Functions (the AI parsing runs in an Edge Function).
 - `expo-notifications` for reminders, scheduled on the device.
 - Design tokens live in `src/theme`. Two typefaces: Newsreader (page titles, chapter names, wordmark) and Figtree (everything else).
-- The desktop website is only an informative page about the app (`/site`), not the app.
+- The desktop website is only an informative page about the app (`/site`), not the app. Its approved design is
+  `design/landing.html`.
 
 ## How each work session runs
 1. Read `TASKS.md`. Do the first task that is not ticked and not marked **[needs you]**. Do only that one task.

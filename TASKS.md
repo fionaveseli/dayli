@@ -14,6 +14,10 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 - [x] **02 Theme and base components.** Tokens from `design/prototype.html` (light and dark colours, type scale, spacing, radii). Load Newsreader and Figtree. Text, Button, Chip, Segmented control, Checkbox, Card, Toggle.
 - [ ] **03 Data and rules.** Types and sample data (tasks, fixed commitments, reminders) matching the prototype. Port `dayInfo`, `gapsOn`, `loadOf`, `remOn`, `cutFixed`, `rolloverPlan`, `parseReminder` with unit tests. A small local store (Zustand or React context) persisted with AsyncStorage.
 
+## Website
+
+- [ ] **19 Website.** Build the landing page in `design/landing.html` (open it in a browser) as the site in `/site`: plain HTML, CSS and one small script, no framework and no build step. Match the design: every section, the copy, the colours, Newsreader and Figtree, and the motion (hero lines rising, notes dropping in and floating, the phone and its timeline coming in, sections fading up on scroll, week bars and chapter progress filling, checks popping, the pulsing "next" reminder, the scroll progress line, button hovers). Keep colour tokens in one place with the same values as `src/theme`, and make repeated pieces (paper note, chip, task row, card) reusable classes. It must read well at phone width and with reduced motion turned on. The email form only shows a "coming soon" message for now (task 39 connects it). Leave `[YOUR NAME]`, `[PRICING]` and `[LAUNCH DATE]` as they are. Make sure `npm run lint` still passes with `/site` in the repo. In the pull request: how to preview it (`npx serve site`) and how to publish it for free (Vercel, Netlify or GitHub Pages).
+
 ## Today
 
 - [ ] **04 Today, checklist.** Greeting with today's one fact, Don't forget, fixed commitments, flexible tasks, Done today. Tick off with the completion animation.
@@ -43,7 +47,6 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 
 - [ ] **17 App icon, splash and a test build** with EAS for your phone.
 - [ ] **18 [needs you] Store accounts.** Apple Developer and Google Play, when you're ready to publish.
-- [ ] **19 Info website.** One static page about Dayli in `/site`.
 
 # v2 — the bigger picture
 
@@ -72,5 +75,5 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 - [ ] **36 Shared reminders.** Share a reminder with someone else, e.g. both parents seeing who does today's pickup.
 - [ ] **37 Crash reporting and simple analytics,** privacy-friendly, no personal data in events.
 - [ ] **38 [needs you] Store listing.** Screenshots, description, privacy policy and support email.
-- [ ] **39 Website with waitlist.** Upgrade the info page: the story, screenshots and a waitlist form.
+- [ ] **39 Website waitlist.** Connect the email form in `/site` to a real waitlist (a Supabase table written through an Edge Function), and add real app screenshots to the site.
 - [ ] **40 Beta, then launch.** TestFlight and Play testing build for friends, fix what they find, then public release.
