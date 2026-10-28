@@ -3,11 +3,14 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Card, Text } from '../components';
+import { Card, Segmented, Text } from '../components';
 import { dateLine, dayIndexOf, dayInfo, fmtD, fmtT, greetingFor, remOn, toLine } from '../rules';
 import { spacing, useTheme } from '../theme';
 import { usePlan } from '../store';
 import { FixedRow, ReminderRow, TaskRow } from './rows';
+import { Timeline } from './Timeline';
+
+type Mode = 'visual' | 'list';
 
 function SectionHead({
   title,
@@ -50,6 +53,7 @@ function SectionHead({
 export function TodayChecklist({ now }: { now?: Date }) {
   const plan = usePlan();
   const [clock] = useState(() => now ?? new Date());
+  const [mode, setMode] = useState<Mode>('visual');
   const day = dayIndexOf(clock);
   const minutes = clock.getHours() * 60 + clock.getMinutes();
 
@@ -57,6 +61,7 @@ export function TodayChecklist({ now }: { now?: Date }) {
   const reminders = remOn(plan, day);
   const open = info.flex.filter((t) => !t.done);
   const done = info.flex.filter((t) => t.done);
+  const anytime = info.flex.filter((t) => t.time == null).sort((x, y) => +x.done - +y.done);
   const remLeft = reminders.filter((r) => !r.done).length;
   const next = reminders.find((r) => !r.done && r.at >= minutes);
   const leave = reminders.find((r) => r.leave && !r.done);
@@ -95,40 +100,78 @@ export function TodayChecklist({ now }: { now?: Date }) {
           </View>
         </Card>
 
-        <View>
-          <SectionHead title="Set in stone" icon="lock" note={`${info.fixed.length} fixed`} />
-          <View style={{ gap: 8 }}>
-            {info.fixed.map((f) => (
-              <FixedRow key={f.id} fixed={f} />
-            ))}
-            {info.fixed.length === 0 && <Text tone="muted">Nothing fixed today.</Text>}
-          </View>
-        </View>
+        <Segmented
+          full
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'visual', label: 'Visual day' },
+            { value: 'list', label: 'Checklist' },
+          ]}
+        />
 
-        <View>
-          <SectionHead title="Flexible today" note={`${fmtD(info.left)} in total`} />
-          <View style={{ gap: 8 }}>
-            {open.map((t) => (
-              <TaskRow key={t.id} task={t} onToggle={() => plan.toggleTask(t.id)} />
-            ))}
-            {open.length === 0 && (
-              <View style={{ paddingVertical: 12 }}>
-                <Text variant="h2">That&apos;s the whole list.</Text>
-                <Text tone="muted">Nothing flexible left for today. Enjoy the evening.</Text>
+        {mode === 'visual' ? (
+          <>
+            <View>
+              <SectionHead
+                title="Anytime today"
+                note={`${anytime.filter((t) => !t.done).length} flexible · no fixed time`}
+              />
+              <View style={{ gap: 8 }}>
+                {anytime.map((t) => (
+                  <TaskRow key={t.id} task={t} onToggle={() => plan.toggleTask(t.id)} />
+                ))}
+                {anytime.length === 0 && <Text tone="muted">Nothing without a time today.</Text>}
+              </View>
+            </View>
+            <View>
+              <SectionHead title="Your day" />
+              <Timeline
+                plan={plan}
+                day={day}
+                now={minutes}
+                onToggleTask={(id) => plan.toggleTask(id)}
+              />
+            </View>
+          </>
+        ) : (
+          <>
+            <View>
+              <SectionHead title="Set in stone" icon="lock" note={`${info.fixed.length} fixed`} />
+              <View style={{ gap: 8 }}>
+                {info.fixed.map((f) => (
+                  <FixedRow key={f.id} fixed={f} />
+                ))}
+                {info.fixed.length === 0 && <Text tone="muted">Nothing fixed today.</Text>}
+              </View>
+            </View>
+
+            <View>
+              <SectionHead title="Flexible today" note={`${fmtD(info.left)} in total`} />
+              <View style={{ gap: 8 }}>
+                {open.map((t) => (
+                  <TaskRow key={t.id} task={t} onToggle={() => plan.toggleTask(t.id)} />
+                ))}
+                {open.length === 0 && (
+                  <View style={{ paddingVertical: 12 }}>
+                    <Text variant="h2">That&apos;s the whole list.</Text>
+                    <Text tone="muted">Nothing flexible left for today. Enjoy the evening.</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {done.length > 0 && (
+              <View>
+                <SectionHead title="Done today" note={String(done.length)} />
+                <View style={{ gap: 8 }}>
+                  {done.map((t) => (
+                    <TaskRow key={t.id} task={t} onToggle={() => plan.toggleTask(t.id)} />
+                  ))}
+                </View>
               </View>
             )}
-          </View>
-        </View>
-
-        {done.length > 0 && (
-          <View>
-            <SectionHead title="Done today" note={String(done.length)} />
-            <View style={{ gap: 8 }}>
-              {done.map((t) => (
-                <TaskRow key={t.id} task={t} onToggle={() => plan.toggleTask(t.id)} />
-              ))}
-            </View>
-          </View>
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
