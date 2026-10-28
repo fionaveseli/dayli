@@ -21,7 +21,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 ## Today
 
 - [x] **04 Today, checklist.** Greeting with today's one fact, Don't forget, fixed commitments, flexible tasks, Done today. Tick off with the completion animation.
-- [ ] **05 Today, visual day.** Timeline with fixed blocks, placed tasks, open gaps, reminder pills and the now line. Switch between Visual day and Checklist.
+- [x] **05 Today, visual day.** Timeline with fixed blocks, placed tasks, open gaps, reminder pills and the now line. Switch between Visual day and Checklist.
 - [ ] **06 Editor.** Bottom sheet for Flexible, Fixed and Reminder (all fields from the prototype). Edit, delete, switch type.
 - [ ] **07 Quick add.** One line anywhere; "remind me at 4 to…" becomes a reminder.
 
