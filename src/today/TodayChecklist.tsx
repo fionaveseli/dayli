@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card, Segmented, Text } from '../components';
 import { dateLine, dayIndexOf, dayInfo, fmtD, fmtT, greetingFor, remOn, toLine } from '../rules';
 import { spacing, useTheme } from '../theme';
+import { useEditor } from '../editor';
 import { usePlan } from '../store';
 import { FixedRow, ReminderRow, TaskRow } from './rows';
 import { Timeline } from './Timeline';
@@ -52,6 +53,7 @@ function SectionHead({
 
 export function TodayChecklist({ now }: { now?: Date }) {
   const plan = usePlan();
+  const { openEditor } = useEditor();
   const [clock] = useState(() => now ?? new Date());
   const [mode, setMode] = useState<Mode>('visual');
   const day = dayIndexOf(clock);
@@ -94,6 +96,7 @@ export function TodayChecklist({ now }: { now?: Date }) {
                 next={next?.id === r.id}
                 missed={!r.done && r.at < minutes}
                 onToggle={() => plan.toggleReminder(r.id, day)}
+                onOpen={() => openEditor({ kind: 'rem', id: r.id })}
               />
             ))}
             {reminders.length === 0 && <Text tone="muted">Nothing to remember today.</Text>}
@@ -119,7 +122,12 @@ export function TodayChecklist({ now }: { now?: Date }) {
               />
               <View style={{ gap: 8 }}>
                 {anytime.map((t) => (
-                  <TaskRow key={t.id} task={t} onToggle={() => plan.toggleTask(t.id)} />
+                  <TaskRow
+                    key={t.id}
+                    task={t}
+                    onToggle={() => plan.toggleTask(t.id)}
+                    onOpen={() => openEditor({ kind: 'flex', id: t.id })}
+                  />
                 ))}
                 {anytime.length === 0 && <Text tone="muted">Nothing without a time today.</Text>}
               </View>
@@ -140,7 +148,11 @@ export function TodayChecklist({ now }: { now?: Date }) {
               <SectionHead title="Set in stone" icon="lock" note={`${info.fixed.length} fixed`} />
               <View style={{ gap: 8 }}>
                 {info.fixed.map((f) => (
-                  <FixedRow key={f.id} fixed={f} />
+                  <FixedRow
+                    key={f.id}
+                    fixed={f}
+                    onOpen={() => openEditor({ kind: 'fixed', id: f.id })}
+                  />
                 ))}
                 {info.fixed.length === 0 && <Text tone="muted">Nothing fixed today.</Text>}
               </View>
@@ -150,7 +162,12 @@ export function TodayChecklist({ now }: { now?: Date }) {
               <SectionHead title="Flexible today" note={`${fmtD(info.left)} in total`} />
               <View style={{ gap: 8 }}>
                 {open.map((t) => (
-                  <TaskRow key={t.id} task={t} onToggle={() => plan.toggleTask(t.id)} />
+                  <TaskRow
+                    key={t.id}
+                    task={t}
+                    onToggle={() => plan.toggleTask(t.id)}
+                    onOpen={() => openEditor({ kind: 'flex', id: t.id })}
+                  />
                 ))}
                 {open.length === 0 && (
                   <View style={{ paddingVertical: 12 }}>
@@ -166,7 +183,12 @@ export function TodayChecklist({ now }: { now?: Date }) {
                 <SectionHead title="Done today" note={String(done.length)} />
                 <View style={{ gap: 8 }}>
                   {done.map((t) => (
-                    <TaskRow key={t.id} task={t} onToggle={() => plan.toggleTask(t.id)} />
+                    <TaskRow
+                      key={t.id}
+                      task={t}
+                      onToggle={() => plan.toggleTask(t.id)}
+                      onOpen={() => openEditor({ kind: 'flex', id: t.id })}
+                    />
                   ))}
                 </View>
               </View>

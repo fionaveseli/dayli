@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, View } from 'react-native';
+import { Animated, Pressable, View } from 'react-native';
 
 import { Checkbox, Text } from '../components';
 import type { Fixed, ReminderWithAt, Task } from '../data/types';
@@ -39,59 +39,76 @@ function useSettle(done: boolean) {
   return scale;
 }
 
-export function TaskRow({ task, onToggle }: { task: Task; onToggle: () => void }) {
+export function TaskRow({
+  task,
+  onToggle,
+  onOpen,
+}: {
+  task: Task;
+  onToggle: () => void;
+  onOpen?: () => void;
+}) {
   const { colors: c } = useTheme();
   const scale = useSettle(task.done);
   return (
-    <Animated.View
-      style={{
-        transform: [{ scale }],
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        minHeight: 56,
-        paddingVertical: 6,
-        paddingLeft: 8,
-        paddingRight: 14,
-        borderRadius: radii.md,
-        borderWidth: 1,
-        borderColor: c.line,
-        backgroundColor: task.done ? 'transparent' : c.card,
-      }}
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Edit ${task.title}`}
+      onPress={onOpen}
     >
-      <Checkbox checked={task.done} onChange={onToggle} label={`Complete ${task.title}`} />
-      <View style={{ flex: 1, paddingVertical: 4 }}>
-        <Text
-          variant="h3"
-          tone={task.done ? 'muted' : 'ink'}
-          style={task.done ? { textDecorationLine: 'line-through', fontWeight: '500' } : undefined}
-        >
-          {task.title}
-        </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-          <Dot cat={task.cat} />
-          <Text variant="small" tone="muted">
-            {CATS[task.cat].label} · {fmtD(task.dur)}
-            {task.time != null ? ` · ${fmtT(task.time)}` : ''}
+      <Animated.View
+        style={{
+          transform: [{ scale }],
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 4,
+          minHeight: 56,
+          paddingVertical: 6,
+          paddingLeft: 8,
+          paddingRight: 14,
+          borderRadius: radii.md,
+          borderWidth: 1,
+          borderColor: c.line,
+          backgroundColor: task.done ? 'transparent' : c.card,
+        }}
+      >
+        <Checkbox checked={task.done} onChange={onToggle} label={`Complete ${task.title}`} />
+        <View style={{ flex: 1, paddingVertical: 4 }}>
+          <Text
+            variant="h3"
+            tone={task.done ? 'muted' : 'ink'}
+            style={
+              task.done ? { textDecorationLine: 'line-through', fontWeight: '500' } : undefined
+            }
+          >
+            {task.title}
           </Text>
-          {task.pri === 3 && !task.done && (
-            <Text variant="small" style={{ color: c.blushInk }}>
-              Priority
+          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+            <Dot cat={task.cat} />
+            <Text variant="small" tone="muted">
+              {CATS[task.cat].label} · {fmtD(task.dur)}
+              {task.time != null ? ` · ${fmtT(task.time)}` : ''}
             </Text>
-          )}
+            {task.pri === 3 && !task.done && (
+              <Text variant="small" style={{ color: c.blushInk }}>
+                Priority
+              </Text>
+            )}
+          </View>
         </View>
-      </View>
-    </Animated.View>
+      </Animated.View>
+    </Pressable>
   );
 }
 
-export function FixedRow({ fixed }: { fixed: Fixed }) {
+export function FixedRow({ fixed, onOpen }: { fixed: Fixed; onOpen?: () => void }) {
   const { colors } = useTheme();
   const t = toneColors(colors, CATS[fixed.cat].tone);
   return (
-    <View
-      accessible
+    <Pressable
+      accessibilityRole="button"
       accessibilityLabel={`${fixed.title}, ${fmtT(fixed.start)} to ${fmtT(fixed.end)}`}
+      onPress={onOpen}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -119,7 +136,7 @@ export function FixedRow({ fixed }: { fixed: Fixed }) {
         ) : null}
       </View>
       <Ionicons name="lock-closed-outline" size={16} color={t.ink} />
-    </View>
+    </Pressable>
   );
 }
 
@@ -128,11 +145,13 @@ export function ReminderRow({
   next,
   missed,
   onToggle,
+  onOpen,
 }: {
   reminder: ReminderWithAt;
   next: boolean;
   missed: boolean;
   onToggle: () => void;
+  onOpen?: () => void;
 }) {
   const { colors: c } = useTheme();
   const r = reminder;
@@ -143,7 +162,10 @@ export function ReminderRow({
       : null;
   const meta = [sub, r.note || null].filter(Boolean).join(' · ') || 'Reminder at the time';
   return (
-    <View
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Edit ${r.title}`}
+      onPress={onOpen}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -184,6 +206,6 @@ export function ReminderRow({
           Missed
         </Text>
       )}
-    </View>
+    </Pressable>
   );
 }
