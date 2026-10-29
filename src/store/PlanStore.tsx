@@ -16,6 +16,7 @@ export const STORAGE_KEY = 'dayli.plan.v1';
 
 export type PlanStore = PlanData & {
   ready: boolean;
+  apply: (f: (p: PlanData) => PlanData) => void;
   setTasks: (f: (ts: Task[]) => Task[]) => void;
   setFixed: (f: (fs: Fixed[]) => Fixed[]) => void;
   setReminders: (f: (rs: Reminder[]) => Reminder[]) => void;
@@ -49,6 +50,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(plan)).catch(() => {});
   }, [plan]);
 
+  const apply = useCallback((f: (p: PlanData) => PlanData) => setPlan(f), []);
   const setTasks = useCallback(
     (f: (ts: Task[]) => Task[]) => setPlan((p) => ({ ...p, tasks: f(p.tasks) })),
     [],
@@ -91,6 +93,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     () => ({
       ...plan,
       ready,
+      apply,
       setTasks,
       setFixed,
       setReminders,
@@ -99,7 +102,18 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       toggleReminder,
       reset,
     }),
-    [plan, ready, setTasks, setFixed, setReminders, setSettings, toggleTask, toggleReminder, reset],
+    [
+      plan,
+      ready,
+      apply,
+      setTasks,
+      setFixed,
+      setReminders,
+      setSettings,
+      toggleTask,
+      toggleReminder,
+      reset,
+    ],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
