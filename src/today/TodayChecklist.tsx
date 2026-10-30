@@ -7,6 +7,7 @@ import { Card, Segmented, Text } from '../components';
 import { dateLine, dayIndexOf, dayInfo, fmtD, fmtT, greetingFor, remOn, toLine } from '../rules';
 import { spacing, useTheme } from '../theme';
 import { useEditor } from '../editor';
+import { QuickAdd } from '../quickadd';
 import { usePlan } from '../store';
 import { FixedRow, ReminderRow, TaskRow } from './rows';
 import { Timeline } from './Timeline';
@@ -102,6 +103,8 @@ export function TodayChecklist({ now }: { now?: Date }) {
             {reminders.length === 0 && <Text tone="muted">Nothing to remember today.</Text>}
           </View>
         </Card>
+
+        <QuickAdd day={day} />
 
         <Segmented
           full
