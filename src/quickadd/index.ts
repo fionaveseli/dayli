@@ -1,2 +1,2 @@
 export { QuickAdd } from './QuickAdd';
-export { quickAdd } from './quickAdd';
+export { quickAdd } from './quickAddText';

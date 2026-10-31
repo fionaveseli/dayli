@@ -1,5 +1,5 @@
 import { SAMPLE_PLAN } from '../data/sample';
-import { quickAdd } from './quickAdd';
+import { quickAdd } from './quickAddText';
 
 describe('quickAdd', () => {
   it('ignores empty text', () => {

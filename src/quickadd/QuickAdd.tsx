@@ -6,7 +6,7 @@ import { Button, Text } from '../components';
 import type { DayIndex } from '../data/types';
 import { usePlan } from '../store';
 import { fonts, hit, radii, useTheme } from '../theme';
-import { quickAdd } from './quickAdd';
+import { quickAdd } from './quickAddText';
 
 const PLACEHOLDER = 'Add something, or "remind me at 4 to…"';
 
