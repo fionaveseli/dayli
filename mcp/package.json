@@ -1,0 +1,16 @@
+{
+  "name": "dayli-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local MCP server that lets an AI assistant read a Dayli plan.",
+  "type": "module",
+  "scripts": {
+    "test": "tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "^6.0.3"
+  }
+}
