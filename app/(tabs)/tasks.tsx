@@ -1,5 +1,5 @@
-import { EmptyScreen } from '../../src/EmptyScreen';
+import { TasksScreen } from '../../src/tasks';
 
-export default function TasksScreen() {
-  return <EmptyScreen title="Tasks" />;
+export default function Tasks() {
+  return <TasksScreen />;
 }

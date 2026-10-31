@@ -28,7 +28,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 ## Plan the week
 
 - [x] **08 Calendar.** Week grid and day view, day panel with free time and load, move a task to another day, place it at an open time.
-- [ ] **09 Tasks screen.** Today, This week, Brain dump, Reminders, Completed, and the category filter.
+- [x] **09 Tasks screen.** Today, This week, Brain dump, Reminders, Completed, and the category filter.
 
 ## Autopilot
 
