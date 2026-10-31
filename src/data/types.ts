@@ -69,6 +69,8 @@ export type Settings = {
   rollAsk: boolean;
   capGuard: boolean;
   planTime: number;
+  /** IANA time zone, e.g. `Europe/Tirane`. */
+  timeZone?: string;
 };
 
 /** What the daily autopilot has already done. Dates are local `YYYY-MM-DD`. */
