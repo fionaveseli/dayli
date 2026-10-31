@@ -69,6 +69,16 @@ export type Settings = {
   rollAsk: boolean;
   capGuard: boolean;
   planTime: number;
+  /** IANA time zone, e.g. `Europe/Tirane`. */
+  timeZone?: string;
+};
+
+/** What the daily autopilot has already done. Dates are local `YYYY-MM-DD`. */
+export type Autopilot = {
+  /** The day whose plan was approved, and the minute it happened. */
+  approved?: { date: string; at: number };
+  /** The last day whose unfinished tasks were moved forward (or left on purpose). */
+  rolledThrough?: string;
 };
 
 export type PlanData = {
@@ -76,6 +86,7 @@ export type PlanData = {
   tasks: Task[];
   reminders: Reminder[];
   settings: Settings;
+  autopilot?: Autopilot;
 };
 
 export type ReminderWithAt = Reminder & { at: number; done: boolean };
