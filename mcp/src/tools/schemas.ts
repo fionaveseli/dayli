@@ -75,3 +75,45 @@ export const dayScheduleOutput = {
 
 export const DayScheduleSchema = z.object(dayScheduleOutput);
 export type DayScheduleOutput = z.infer<typeof DayScheduleSchema>;
+
+/** Open slots are calculated by the existing Dayli rules (gapsOn / fitGaps). */
+export const availableTimeInput = {
+  ...dayInput,
+  min_minutes: z
+    .number()
+    .int()
+    .min(30)
+    .default(30)
+    .describe('Minimum slot duration in minutes (at least 30)'),
+  from_now: z.boolean().optional().describe('Default true for today, false for other days'),
+};
+
+export const availableTimeOutput = {
+  day: dayScheduleOutput.day,
+  now: dayScheduleOutput.now,
+  time_zone: dayScheduleOutput.time_zone,
+  data_source: dayScheduleOutput.data_source,
+  slots: z.array(
+    z.object({
+      start: hhmm(),
+      end: hhmm(),
+      minutes: z.number().int().nonnegative(),
+    }),
+  ),
+  total_open_minutes: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe(
+      'Sum of the slots: time not taken by fixed blocks or timed tasks. Breathing room is not ' +
+        'removed, so this differs from free_minutes in get_day_schedule.',
+    ),
+  buffer_minutes: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe('Breathing room the user wants to keep free each day; leave it when filling slots'),
+};
+
+export const AvailableTimeSchema = z.object(availableTimeOutput);
+export type AvailableTimeOutput = z.infer<typeof AvailableTimeSchema>;

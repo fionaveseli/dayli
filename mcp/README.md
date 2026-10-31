@@ -53,6 +53,19 @@ Errors: `DAY_OUT_OF_RANGE`, `AMBIGUOUS_DAY`, `INVALID_DAY`, `DATA_UNAVAILABLE`, 
 They come back with `isError: true` as JSON text (`{"error": {"code", "message", "hint"}}`) and no
 structured content, because structured content must match the output schema of a successful result.
 
+### `get_available_time`
+
+Open time on one day of the current week, from the app's own gap rules.
+
+Input: `day` (optional, defaults to today), `min_minutes` (at least 30, default 30), and `from_now`
+(defaults to true for today, so slots start at the next quarter hour from now).
+
+Output: `slots[]` with start, end and minutes, `total_open_minutes`, and `buffer_minutes` (the breathing
+room to leave free). Open minutes subtract fixed blocks and timed tasks but not breathing room, so they
+are not the same number as `free_minutes` in `get_day_schedule`.
+
+Errors: the same day errors, plus `INVALID_INPUT` for a bad `min_minutes`.
+
 ## Run it
 
 ```
