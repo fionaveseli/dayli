@@ -17,6 +17,7 @@ import { Autopilot } from '../src/autopilot';
 import { EditorProvider } from '../src/editor';
 import { Notifier } from '../src/notifications';
 import { PlanProvider } from '../src/store';
+import { AuthProvider, SyncProvider } from '../src/sync';
 import { ThemeProvider, useTheme } from '../src/theme';
 
 function Shell() {
@@ -44,13 +45,17 @@ export default function RootLayout() {
   if (!loaded) return null;
   return (
     <ThemeProvider>
-      <PlanProvider>
-        <EditorProvider>
-          <Notifier />
-          <Autopilot />
-          <Shell />
-        </EditorProvider>
-      </PlanProvider>
+      <AuthProvider>
+        <PlanProvider>
+          <SyncProvider>
+            <EditorProvider>
+              <Notifier />
+              <Autopilot />
+              <Shell />
+            </EditorProvider>
+          </SyncProvider>
+        </PlanProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

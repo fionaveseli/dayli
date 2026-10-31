@@ -13,12 +13,31 @@ import { SAMPLE_PLAN } from '../data/sample';
 import { moveTask as moveT, placeTask as placeT, unplaceTask as unplaceT } from '../rules/calendar';
 import { dateKey, rolloverFor } from '../rules/autopilot';
 import { snoozeReminder as snoozeR } from '../notifications/plan';
+import { mondayKey } from '../sync/dates';
+import { fromView, migrateWeekPlan, toView, type DatedPlan } from '../sync/dated';
 import type { DayIndex, PlanData, Reminder, Settings, Task, Fixed } from '../data/types';
 
-export const STORAGE_KEY = 'dayli.plan.v1';
+/** The first shape: day indexes of one week. Read once to move it to the dated shape. */
+export const LEGACY_KEY = 'dayli.plan.v1';
+export const STORAGE_KEY = 'dayli.plan.v2';
+
+const thisMonday = () => mondayKey(new Date());
+const zone = () => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+};
+const withZone = (d: DatedPlan): DatedPlan =>
+  d.settings.timeZone ? d : { ...d, settings: { ...d.settings, timeZone: zone() } };
+const initial = () => withZone(migrateWeekPlan(SAMPLE_PLAN, thisMonday()));
 
 export type PlanStore = PlanData & {
   ready: boolean;
+  /** The plan with real dates, as it is saved and synced. */
+  dated: DatedPlan;
+  setDated: (f: (d: DatedPlan) => DatedPlan) => void;
   apply: (f: (p: PlanData) => PlanData) => void;
   setTasks: (f: (ts: Task[]) => Task[]) => void;
   setFixed: (f: (fs: Fixed[]) => Fixed[]) => void;
@@ -43,15 +62,32 @@ export type PlanStore = PlanData & {
 const Ctx = createContext<PlanStore | null>(null);
 
 export function PlanProvider({ children }: { children: ReactNode }) {
-  const [plan, setPlan] = useState<PlanData>(SAMPLE_PLAN);
+  const [dated, setDated] = useState<DatedPlan>(initial);
   const [ready, setReady] = useState(false);
   const loaded = useRef(false);
+  const monday = thisMonday();
+  const plan = useMemo(() => toView(dated, monday), [dated, monday]);
+
+  /** Change the plan the way the screens see it (day indexes); it is saved with dates. */
+  const setPlan = useCallback(
+    (f: (p: PlanData) => PlanData) =>
+      setDated((d) => {
+        const m = thisMonday();
+        return fromView(d, f(toView(d, m)), m);
+      }),
+    [],
+  );
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY)
-      .then((raw) => {
-        if (raw) setPlan({ ...SAMPLE_PLAN, ...JSON.parse(raw) });
-      })
+    (async () => {
+      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      if (raw) return setDated(withZone({ ...initial(), ...JSON.parse(raw) }));
+      const old = await AsyncStorage.getItem(LEGACY_KEY);
+      if (old) {
+        const p: PlanData = { ...SAMPLE_PLAN, ...JSON.parse(old) };
+        setDated(withZone(migrateWeekPlan(p, thisMonday())));
+      }
+    })()
       .catch(() => {})
       .finally(() => {
         loaded.current = true;
@@ -61,25 +97,25 @@ export function PlanProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!loaded.current) return;
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(plan)).catch(() => {});
-  }, [plan]);
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(dated)).catch(() => {});
+  }, [dated]);
 
-  const apply = useCallback((f: (p: PlanData) => PlanData) => setPlan(f), []);
+  const apply = useCallback((f: (p: PlanData) => PlanData) => setPlan(f), [setPlan]);
   const setTasks = useCallback(
     (f: (ts: Task[]) => Task[]) => setPlan((p) => ({ ...p, tasks: f(p.tasks) })),
-    [],
+    [setPlan],
   );
   const setFixed = useCallback(
     (f: (fs: Fixed[]) => Fixed[]) => setPlan((p) => ({ ...p, fixed: f(p.fixed) })),
-    [],
+    [setPlan],
   );
   const setReminders = useCallback(
     (f: (rs: Reminder[]) => Reminder[]) => setPlan((p) => ({ ...p, reminders: f(p.reminders) })),
-    [],
+    [setPlan],
   );
   const setSettings = useCallback(
     (patch: Partial<Settings>) => setPlan((p) => ({ ...p, settings: { ...p.settings, ...patch } })),
-    [],
+    [setPlan],
   );
   const toggleTask = useCallback(
     (id: string) => setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, done: !t.done } : t))),
@@ -133,7 +169,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
           approved: { date: dateKey(now), at: now.getHours() * 60 + now.getMinutes() },
         },
       })),
-    [],
+    [setPlan],
   );
   const unapprovePlan = useCallback(
     () =>
@@ -141,7 +177,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
         const { approved: _gone, ...rest } = p.autopilot ?? {};
         return { ...p, autopilot: rest };
       }),
-    [],
+    [setPlan],
   );
   const runRollover = useCallback(
     (now: Date) =>
@@ -150,19 +186,21 @@ export function PlanProvider({ children }: { children: ReactNode }) {
         if (!r.through) return p;
         return { ...p, tasks: r.tasks, autopilot: { ...p.autopilot, rolledThrough: r.through } };
       }),
-    [],
+    [setPlan],
   );
   const skipRollover = useCallback(
     (through: string) =>
       setPlan((p) => ({ ...p, autopilot: { ...p.autopilot, rolledThrough: through } })),
-    [],
+    [setPlan],
   );
-  const reset = useCallback(() => setPlan(SAMPLE_PLAN), []);
+  const reset = useCallback(() => setDated(initial()), []);
 
   const value = useMemo(
     () => ({
       ...plan,
       ready,
+      dated,
+      setDated,
       apply,
       setTasks,
       setFixed,
@@ -184,6 +222,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     [
       plan,
       ready,
+      dated,
       apply,
       setTasks,
       setFixed,
