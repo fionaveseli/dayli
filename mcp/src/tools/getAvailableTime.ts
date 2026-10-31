@@ -14,9 +14,10 @@ export function buildAvailableTime(
   minMinutes: number,
   fromNow: boolean,
 ): AvailableTimeOutput {
-  const gaps = fromNow && day.isToday
-    ? fitGaps(plan, day.dayIndex, minMinutes, { today: day.dayIndex, now: now.minutes })
-    : gapsOn(plan, day.dayIndex).filter((g) => g.e - g.s >= minMinutes);
+  const gaps =
+    fromNow && day.isToday
+      ? fitGaps(plan, day.dayIndex, minMinutes, { today: day.dayIndex, now: now.minutes })
+      : gapsOn(plan, day.dayIndex).filter((g) => g.e - g.s >= minMinutes);
   const slots = gaps.map((g) => ({
     start: fmtT(g.s),
     end: fmtT(g.e),
@@ -49,7 +50,11 @@ export async function getAvailableTime(
     const day = resolveDay(input.day, now);
     const minMinutes = input.min_minutes ?? 30;
     if (!Number.isSafeInteger(minMinutes) || minMinutes < 30) {
-      throw new ToolError('INVALID_INPUT', 'min_minutes must be an integer of at least 30.', 'Use 30 or a larger whole number.');
+      throw new ToolError(
+        'INVALID_INPUT',
+        'min_minutes must be an integer of at least 30.',
+        'Use 30 or a larger whole number.',
+      );
     }
     if (input.from_now !== undefined && typeof input.from_now !== 'boolean') {
       throw new ToolError('INVALID_INPUT', 'from_now must be a boolean.', 'Use true or false.');
@@ -65,7 +70,10 @@ export async function getAvailableTime(
     return {
       content: [
         { type: 'text' as const, text: JSON.stringify(out) },
-        { type: 'text' as const, text: `${out.day.day_name} ${out.day.date}: ${out.slots.length} available slots, ${out.total_open_minutes} minutes total. Source: ${out.data_source}.` },
+        {
+          type: 'text' as const,
+          text: `${out.day.day_name} ${out.day.date}: ${out.slots.length} available slots, ${out.total_open_minutes} minutes total. Source: ${out.data_source}.`,
+        },
       ],
       structuredContent: out,
     };

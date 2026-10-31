@@ -45,7 +45,10 @@ describe('get_available_time', () => {
       minutes: g.e - g.s,
     }));
     assert.deepEqual(output.slots, expected);
-    assert.equal(output.total_open_minutes, expected.reduce((s, g) => s + g.minutes, 0));
+    assert.equal(
+      output.total_open_minutes,
+      expected.reduce((s, g) => s + g.minutes, 0),
+    );
     assert.equal(output.buffer_minutes, SAMPLE_PLAN.settings.buffer);
   });
 
@@ -55,7 +58,9 @@ describe('get_available_time', () => {
   });
 
   it('can include earlier slots when from_now=false', async () => {
-    const output = await ok(plan({ fixed: [], tasks: [], reminders: [] }), SATURDAY, { from_now: false });
+    const output = await ok(plan({ fixed: [], tasks: [], reminders: [] }), SATURDAY, {
+      from_now: false,
+    });
     assert.equal(output.slots[0].start, '07:00');
   });
 
@@ -81,7 +86,12 @@ describe('get_available_time', () => {
   });
 
   it('does not leak storage errors', async () => {
-    const source: PlanSource = { name: 'broken', load: async () => { throw new Error('private db credentials'); } };
+    const source: PlanSource = {
+      name: 'broken',
+      load: async () => {
+        throw new Error('private db credentials');
+      },
+    };
     const result = await err(source, MONDAY);
     assert.equal(result.code, 'DATA_UNAVAILABLE');
     assert.doesNotMatch(JSON.stringify(result), /private db credentials/);
