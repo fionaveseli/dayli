@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from 'react';
 import { SAMPLE_PLAN } from '../data/sample';
+import { moveTask as moveT, placeTask as placeT, unplaceTask as unplaceT } from '../rules/calendar';
 import type { DayIndex, PlanData, Reminder, Settings, Task, Fixed } from '../data/types';
 
 export const STORAGE_KEY = 'dayli.plan.v1';
@@ -23,6 +24,9 @@ export type PlanStore = PlanData & {
   setSettings: (patch: Partial<Settings>) => void;
   toggleTask: (id: string) => void;
   toggleReminder: (id: string, day: DayIndex) => void;
+  moveTask: (id: string, day: DayIndex | null) => void;
+  placeTask: (id: string, day: DayIndex, time: number) => void;
+  unplaceTask: (id: string) => void;
   reset: () => void;
 };
 
@@ -87,6 +91,15 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       ),
     [setReminders],
   );
+  const moveTask = useCallback(
+    (id: string, day: DayIndex | null) => setTasks((ts) => moveT(ts, id, day)),
+    [setTasks],
+  );
+  const placeTask = useCallback(
+    (id: string, day: DayIndex, time: number) => setTasks((ts) => placeT(ts, id, day, time)),
+    [setTasks],
+  );
+  const unplaceTask = useCallback((id: string) => setTasks((ts) => unplaceT(ts, id)), [setTasks]);
   const reset = useCallback(() => setPlan(SAMPLE_PLAN), []);
 
   const value = useMemo(
@@ -100,6 +113,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       setSettings,
       toggleTask,
       toggleReminder,
+      moveTask,
+      placeTask,
+      unplaceTask,
       reset,
     }),
     [
@@ -112,6 +128,9 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       setSettings,
       toggleTask,
       toggleReminder,
+      moveTask,
+      placeTask,
+      unplaceTask,
       reset,
     ],
   );

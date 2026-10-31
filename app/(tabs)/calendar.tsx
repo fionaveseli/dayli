@@ -1,5 +1,5 @@
-import { EmptyScreen } from '../../src/EmptyScreen';
+import { CalendarScreen } from '../../src/calendar/CalendarScreen';
 
-export default function CalendarScreen() {
-  return <EmptyScreen title="Calendar" />;
+export default function Calendar() {
+  return <CalendarScreen />;
 }

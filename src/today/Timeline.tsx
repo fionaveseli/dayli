@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Checkbox, Text } from '../components';
-import type { DayIndex, PlanData } from '../data/types';
+import type { DayIndex, Gap, PlanData } from '../data/types';
 import { CATS, dayInfo, fmtD, fmtT, gapsOn, remOn } from '../rules';
 import { radii, toneColors, useTheme } from '../theme';
 
@@ -18,10 +18,12 @@ type Props = {
   now?: number;
   hourPx?: number;
   onToggleTask?: (id: string) => void;
+  /** Makes open time tappable. */
+  onGap?: (day: DayIndex, gap: Gap) => void;
 };
 
 /** The visual day: fixed blocks, placed tasks, open gaps and reminder pills on an hour grid. */
-export function Timeline({ plan, day, now, hourPx = 44, onToggleTask }: Props) {
+export function Timeline({ plan, day, now, hourPx = 44, onToggleTask, onGap }: Props) {
   const { colors: c } = useTheme();
   const y = (m: number) => ((m - START) / 60) * hourPx;
   const info = dayInfo(plan, day);
@@ -86,10 +88,13 @@ export function Timeline({ plan, day, now, hourPx = 44, onToggleTask }: Props) {
         {gaps.map((g) => {
           const past = now != null && g.e <= now;
           return (
-            <View
+            <Pressable
               key={`g${g.s}`}
               accessible
+              accessibilityRole={onGap && !past ? 'button' : undefined}
               accessibilityLabel={`Open time ${fmtT(g.s)} to ${fmtT(g.e)}`}
+              disabled={!onGap || past}
+              onPress={() => onGap?.(day, g)}
               style={{
                 position: 'absolute',
                 left: 0,
@@ -108,7 +113,7 @@ export function Timeline({ plan, day, now, hourPx = 44, onToggleTask }: Props) {
               <Text variant="small" tone="muted">
                 {past ? 'Earlier' : 'Open'} · {fmtD(g.e - g.s)}
               </Text>
-            </View>
+            </Pressable>
           );
         })}
 
