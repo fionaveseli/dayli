@@ -19,10 +19,16 @@ export default function SignInScreen() {
 
   const submit = async () => {
     setBusy(true);
-    const err = await (mode === 'in' ? signIn : signUp)(email, password);
-    setBusy(false);
-    if (err) setMsg(err);
-    else router.back();
+    setMsg(null);
+    try {
+      const err = await (mode === 'in' ? signIn : signUp)(email, password);
+      if (err) setMsg(err);
+      else router.back();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Something went wrong. Try again.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   const input = [styles.input, { backgroundColor: c.card, borderColor: c.line2, color: c.ink }];
