@@ -29,7 +29,7 @@ for copy, and for the logic. Port behaviour from its pure functions (`dayInfo`, 
 
 ## Rules
 - Never commit secrets. Keys go in `.env` (git-ignored) or Supabase secrets. The repo is public.
-  Only the Supabase URL and anon key may use the `EXPO_PUBLIC_` prefix.
+  Only the Supabase URL and publishable key may use the `EXPO_PUBLIC_` prefix.
 - No AI attribution anywhere: no `Co-Authored-By` lines, no "Generated with" footers, no session links,
   no mention of Claude in commits, pull requests, code comments or docs.
 - Keep commits small and messages plain ("Add Today checklist", not essays).
