@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { SAMPLE_PLAN } from '../data/sample';
 import { moveTask as moveT, placeTask as placeT, unplaceTask as unplaceT } from '../rules/calendar';
+import { dateKey, rolloverFor } from '../rules/autopilot';
 import { snoozeReminder as snoozeR } from '../notifications/plan';
 import type { DayIndex, PlanData, Reminder, Settings, Task, Fixed } from '../data/types';
 
@@ -30,6 +31,12 @@ export type PlanStore = PlanData & {
   moveTask: (id: string, day: DayIndex | null) => void;
   placeTask: (id: string, day: DayIndex, time: number) => void;
   unplaceTask: (id: string) => void;
+  approvePlan: (now: Date) => void;
+  unapprovePlan: () => void;
+  /** Move unfinished tasks of days that have ended to the next day with room. */
+  runRollover: (now: Date) => void;
+  /** Mark ended days as handled without moving anything. */
+  skipRollover: (through: string) => void;
   reset: () => void;
 };
 
@@ -117,6 +124,39 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     [setTasks],
   );
   const unplaceTask = useCallback((id: string) => setTasks((ts) => unplaceT(ts, id)), [setTasks]);
+  const approvePlan = useCallback(
+    (now: Date) =>
+      setPlan((p) => ({
+        ...p,
+        autopilot: {
+          ...p.autopilot,
+          approved: { date: dateKey(now), at: now.getHours() * 60 + now.getMinutes() },
+        },
+      })),
+    [],
+  );
+  const unapprovePlan = useCallback(
+    () =>
+      setPlan((p) => {
+        const { approved: _gone, ...rest } = p.autopilot ?? {};
+        return { ...p, autopilot: rest };
+      }),
+    [],
+  );
+  const runRollover = useCallback(
+    (now: Date) =>
+      setPlan((p) => {
+        const r = rolloverFor(p, now);
+        if (!r.through) return p;
+        return { ...p, tasks: r.tasks, autopilot: { ...p.autopilot, rolledThrough: r.through } };
+      }),
+    [],
+  );
+  const skipRollover = useCallback(
+    (through: string) =>
+      setPlan((p) => ({ ...p, autopilot: { ...p.autopilot, rolledThrough: through } })),
+    [],
+  );
   const reset = useCallback(() => setPlan(SAMPLE_PLAN), []);
 
   const value = useMemo(
@@ -135,6 +175,10 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       moveTask,
       placeTask,
       unplaceTask,
+      approvePlan,
+      unapprovePlan,
+      runRollover,
+      skipRollover,
       reset,
     }),
     [
@@ -152,6 +196,10 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       moveTask,
       placeTask,
       unplaceTask,
+      approvePlan,
+      unapprovePlan,
+      runRollover,
+      skipRollover,
       reset,
     ],
   );

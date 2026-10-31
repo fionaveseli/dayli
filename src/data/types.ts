@@ -71,11 +71,20 @@ export type Settings = {
   planTime: number;
 };
 
+/** What the daily autopilot has already done. Dates are local `YYYY-MM-DD`. */
+export type Autopilot = {
+  /** The day whose plan was approved, and the minute it happened. */
+  approved?: { date: string; at: number };
+  /** The last day whose unfinished tasks were moved forward (or left on purpose). */
+  rolledThrough?: string;
+};
+
 export type PlanData = {
   fixed: Fixed[];
   tasks: Task[];
   reminders: Reminder[];
   settings: Settings;
+  autopilot?: Autopilot;
 };
 
 export type ReminderWithAt = Reminder & { at: number; done: boolean };
