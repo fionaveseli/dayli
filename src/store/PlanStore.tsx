@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { SAMPLE_PLAN } from '../data/sample';
 import { moveTask as moveT, placeTask as placeT, unplaceTask as unplaceT } from '../rules/calendar';
+import { snoozeReminder as snoozeR } from '../notifications/plan';
 import type { DayIndex, PlanData, Reminder, Settings, Task, Fixed } from '../data/types';
 
 export const STORAGE_KEY = 'dayli.plan.v1';
@@ -24,6 +25,8 @@ export type PlanStore = PlanData & {
   setSettings: (patch: Partial<Settings>) => void;
   toggleTask: (id: string) => void;
   toggleReminder: (id: string, day: DayIndex) => void;
+  markReminderDone: (id: string, day: DayIndex) => void;
+  snoozeReminder: (id: string, day: DayIndex, nowMin: number) => void;
   moveTask: (id: string, day: DayIndex | null) => void;
   placeTask: (id: string, day: DayIndex, time: number) => void;
   unplaceTask: (id: string) => void;
@@ -91,6 +94,20 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       ),
     [setReminders],
   );
+  const markReminderDone = useCallback(
+    (id: string, day: DayIndex) =>
+      setReminders((rs) =>
+        rs.map((r) =>
+          r.id !== id || r.doneDays.includes(day) ? r : { ...r, doneDays: [...r.doneDays, day] },
+        ),
+      ),
+    [setReminders],
+  );
+  const snoozeReminder = useCallback(
+    (id: string, day: DayIndex, nowMin: number) =>
+      setReminders((rs) => rs.map((r) => (r.id === id ? snoozeR(r, day, nowMin) : r))),
+    [setReminders],
+  );
   const moveTask = useCallback(
     (id: string, day: DayIndex | null) => setTasks((ts) => moveT(ts, id, day)),
     [setTasks],
@@ -113,6 +130,8 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       setSettings,
       toggleTask,
       toggleReminder,
+      markReminderDone,
+      snoozeReminder,
       moveTask,
       placeTask,
       unplaceTask,
@@ -128,6 +147,8 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       setSettings,
       toggleTask,
       toggleReminder,
+      markReminderDone,
+      snoozeReminder,
       moveTask,
       placeTask,
       unplaceTask,
