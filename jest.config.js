@@ -1,1 +1,4 @@
-module.exports = { preset: 'jest-expo' };
+module.exports = {
+  preset: 'jest-expo',
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/mcp/'],
+};
