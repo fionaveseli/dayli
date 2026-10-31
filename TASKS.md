@@ -37,7 +37,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 
 ## Accounts and AI
 
-- [ ] **12 [needs you] Supabase project.** Create a free project at supabase.com and put `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` in `.env`.
+- [x] **12 [needs you] Supabase project.** Create a free project at supabase.com and put `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env`.
 - [ ] **13 Schema and sign-in.** Tables and row-level security as migrations, email sign-in, and the store synced to Supabase.
       Store real calendar dates, so the plan can span weeks and months:
   - Tasks have a `date` (null = brain dump) and an optional start time, instead of a day index.
