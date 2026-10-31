@@ -20,12 +20,24 @@ export function fixedOn(fixed: Fixed[], d: DayIndex): Fixed[] {
 const overlap = (a1: number, a2: number, b1: number, b2: number) =>
   Math.max(0, Math.min(a2, b2) - Math.max(a1, b1));
 
+/** Minutes inside wake–sleep covered by at least one fixed block (overlaps count once). */
+function busyMinutes(fixedList: Fixed[], wake: number, sleep: number): number {
+  const spans = fixedList
+    .map((f): [number, number] => [Math.max(f.start, wake), Math.min(f.end, sleep)])
+    .filter(([s, e]) => e > s)
+    .sort((a, b) => a[0] - b[0]);
+  let busy = 0;
+  let cur = wake;
+  for (const [s, e] of spans) {
+    busy += overlap(s, e, cur, sleep);
+    cur = Math.max(cur, e);
+  }
+  return busy;
+}
+
 /** Minutes of the waking day not taken by fixed blocks or breathing room. */
 export function freeFor(fixedList: Fixed[], settings: Settings): number {
-  const busy = fixedList.reduce(
-    (a, f) => a + overlap(f.start, f.end, settings.wake, settings.sleep),
-    0,
-  );
+  const busy = busyMinutes(fixedList, settings.wake, settings.sleep);
   return Math.max(0, settings.sleep - settings.wake - busy - settings.buffer);
 }
 

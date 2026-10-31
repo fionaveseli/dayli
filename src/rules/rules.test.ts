@@ -1,7 +1,16 @@
 import { SAMPLE_PLAN } from '../data/sample';
 import type { PlanData } from '../data/types';
 import { fmtD, fmtT } from './format';
-import { cutFixed, dayInfo, gapsOn, loadOf, parseReminder, remOn, rolloverPlan } from './rules';
+import {
+  cutFixed,
+  dayInfo,
+  freeFor,
+  gapsOn,
+  loadOf,
+  parseReminder,
+  remOn,
+  rolloverPlan,
+} from './rules';
 
 const plan = (over: Partial<PlanData> = {}): PlanData => ({ ...SAMPLE_PLAN, ...over });
 
@@ -51,6 +60,42 @@ describe('cutFixed', () => {
   it('leaves other days alone', () => {
     const [work] = cutFixed(SAMPLE_PLAN.fixed.slice(0, 1), remOn(plan(), 1));
     expect(work.end).toBe(1020);
+  });
+});
+
+describe('freeFor', () => {
+  const S = SAMPLE_PLAN.settings; // 07:00–22:30 = 930 min, buffer 60
+  const block = (start: number, end: number) => ({ ...SAMPLE_PLAN.fixed[0], start, end });
+
+  it('counts overlapping blocks once', () => {
+    // 09:00–11:00 and 10:00–12:00 cover 09:00–12:00
+    expect(freeFor([block(540, 660), block(600, 720)], S)).toBe(930 - 180 - 60);
+    expect(freeFor([block(600, 720), block(540, 660)], S)).toBe(930 - 180 - 60);
+  });
+  it('counts a block inside another once', () => {
+    expect(freeFor([block(540, 1020), block(600, 660)], S)).toBe(930 - 480 - 60);
+  });
+  it('adds separate and touching blocks', () => {
+    expect(freeFor([block(540, 600), block(600, 660), block(700, 760)], S)).toBe(930 - 180 - 60);
+  });
+  it('ignores time outside the waking day', () => {
+    expect(freeFor([block(360, 480), block(1320, 1440)], S)).toBe(930 - 60 - 30 - 60);
+    expect(freeFor([block(0, 300)], S)).toBe(930 - 60);
+  });
+  it('never goes below zero', () => {
+    expect(freeFor([block(0, 1440)], S)).toBe(0);
+  });
+  it('agrees with the open gaps when blocks overlap', () => {
+    const p = plan({
+      fixed: [
+        { ...block(540, 660), id: 'o1', days: [5] },
+        { ...block(600, 720), id: 'o2', days: [5] },
+      ],
+      tasks: [],
+      reminders: [],
+    });
+    const open = gapsOn(p, 5).reduce((a, g) => a + g.e - g.s, 0);
+    expect(dayInfo(p, 5).free).toBe(open - S.buffer);
   });
 });
 
