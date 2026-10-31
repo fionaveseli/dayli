@@ -14,6 +14,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import { EditorProvider } from '../src/editor';
+import { Notifier } from '../src/notifications';
 import { PlanProvider } from '../src/store';
 import { ThemeProvider, useTheme } from '../src/theme';
 
@@ -44,6 +45,7 @@ export default function RootLayout() {
     <ThemeProvider>
       <PlanProvider>
         <EditorProvider>
+          <Notifier />
           <Shell />
         </EditorProvider>
       </PlanProvider>
