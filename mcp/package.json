@@ -5,8 +5,14 @@
   "description": "Local MCP server that lets an AI assistant read a Dayli plan.",
   "type": "module",
   "scripts": {
+    "start": "tsx src/main.ts",
+    "inspect": "npx @modelcontextprotocol/inspector tsx src/main.ts",
     "test": "tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "zod": "^3.25.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
