@@ -90,3 +90,15 @@ describe('editor from Today', () => {
     await waitFor(() => expect(queryByText('Improve watercolor canvas')).toBeNull());
   });
 });
+
+describe('TodayChecklist morning plan', () => {
+  it('shows the plan to approve, then the approved line', async () => {
+    const { getByText, queryByText } = await renderToday();
+    expect(getByText('Your plan for today')).toBeTruthy();
+    await fireEvent.press(getByText('Looks good'));
+    await waitFor(() => expect(getByText(/Today's plan approved at 09:17/)).toBeTruthy());
+    expect(queryByText('Your plan for today')).toBeNull();
+    await fireEvent.press(getByText('Review'));
+    await waitFor(() => expect(getByText('Your plan for today')).toBeTruthy());
+  });
+});

@@ -1,11 +1,14 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { planMorningNotifications } from './morning';
 import { planNotifications } from './plan';
 import type { PlanData } from '../data/types';
 
 export const CATEGORY = 'reminder';
 export const ACTION_DONE = 'done';
 export const ACTION_SNOOZE = 'snooze';
+export const PLAN_CATEGORY = 'plan';
+export const ACTION_APPROVE = 'approve';
 const CHANNEL = 'reminders';
 // iOS keeps at most 64 pending local notifications.
 const MAX_PENDING = 60;
@@ -25,6 +28,13 @@ export function setupNotifications() {
       {
         identifier: ACTION_SNOOZE,
         buttonTitle: 'Snooze 10 min',
+        options: { opensAppToForeground: false },
+      },
+    ]),
+    Notifications.setNotificationCategoryAsync(PLAN_CATEGORY, [
+      {
+        identifier: ACTION_APPROVE,
+        buttonTitle: 'Looks good',
         options: { opensAppToForeground: false },
       },
     ]),
@@ -48,7 +58,24 @@ export async function ensurePermission(): Promise<boolean> {
 export async function syncNotifications(plan: PlanData, now = new Date()): Promise<number> {
   if (!(await ensurePermission())) return 0;
   await Notifications.cancelAllScheduledNotificationsAsync();
-  const items = planNotifications(plan, now).slice(0, MAX_PENDING);
+  const mornings = planMorningNotifications(plan, now);
+  const items = planNotifications(plan, now).slice(0, MAX_PENDING - mornings.length);
+  for (const m of mornings) {
+    await Notifications.scheduleNotificationAsync({
+      identifier: m.key,
+      content: {
+        title: m.title,
+        body: m.body,
+        categoryIdentifier: PLAN_CATEGORY,
+        data: { planDate: m.date },
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: m.at,
+        channelId: CHANNEL,
+      },
+    });
+  }
   for (const n of items) {
     await Notifications.scheduleNotificationAsync({
       identifier: n.key,
@@ -66,5 +93,5 @@ export async function syncNotifications(plan: PlanData, now = new Date()): Promi
       },
     });
   }
-  return items.length;
+  return items.length + mornings.length;
 }

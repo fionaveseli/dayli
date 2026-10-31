@@ -7,6 +7,7 @@ import { Card, Segmented, Text } from '../components';
 import { dateLine, dayIndexOf, dayInfo, fmtD, fmtT, greetingFor, remOn, toLine } from '../rules';
 import { spacing, useTheme } from '../theme';
 import { useEditor } from '../editor';
+import { MorningPlan, RolloverAsk } from '../autopilot';
 import { QuickAdd } from '../quickadd';
 import { usePlan } from '../store';
 import { FixedRow, ReminderRow, TaskRow } from './rows';
@@ -82,6 +83,9 @@ export function TodayChecklist({ now }: { now?: Date }) {
             {dateLine(clock)} · {fact}
           </Text>
         </View>
+
+        <RolloverAsk now={clock} />
+        <MorningPlan day={day} now={clock} />
 
         <Card style={{ gap: 4 }} accessibilityLabel="Don't forget">
           <SectionHead

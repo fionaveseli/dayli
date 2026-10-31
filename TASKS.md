@@ -33,7 +33,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 ## Autopilot
 
 - [x] **10 Reminders as notifications.** Schedule and cancel on every change; time-to-leave alerts; Done and Snooze actions; keep reminding until ticked.
-- [ ] **11 Morning plan and rollover.** Plan card to approve and a morning notification; unfinished tasks move to the next day with room when the day has ended.
+- [x] **11 Morning plan and rollover.** Plan card to approve and a morning notification; unfinished tasks move to the next day with room when the day has ended.
 
 ## Accounts and AI
 

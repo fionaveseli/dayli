@@ -100,14 +100,21 @@ export function gapsOn(S: PlanData, d: DayIndex, wk = 0): Gap[] {
   return out;
 }
 
-/** Overnight rollover: each unfinished task for today goes to the first later day that still has room. */
-export function rolloverPlan(S: PlanData): RolloverMove[] {
+/**
+ * Overnight rollover: each unfinished task of day `from` goes to the first later day that still has room.
+ * `firstOpen` is the earliest day a task may land on (defaults to the day after `from`).
+ */
+export function rolloverPlan(
+  S: PlanData,
+  from: DayIndex = 0,
+  firstOpen = from + 1,
+): RolloverMove[] {
   const extra = [0, 0, 0, 0, 0, 0, 0];
   return S.tasks
-    .filter((t) => t.day === 0 && !t.done)
+    .filter((t) => t.day === from && !t.done)
     .sort((a, b) => b.pri - a.pri)
     .map((t) => {
-      for (let d = 1; d < 7; d++) {
+      for (let d = firstOpen; d < 7; d++) {
         const i = dayInfo(S, d, 0);
         const room = i.free - i.planned - extra[d];
         if (t.dur <= room) {

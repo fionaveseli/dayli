@@ -13,6 +13,7 @@ import {
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
+import { Autopilot } from '../src/autopilot';
 import { EditorProvider } from '../src/editor';
 import { Notifier } from '../src/notifications';
 import { PlanProvider } from '../src/store';
@@ -46,6 +47,7 @@ export default function RootLayout() {
       <PlanProvider>
         <EditorProvider>
           <Notifier />
+          <Autopilot />
           <Shell />
         </EditorProvider>
       </PlanProvider>
