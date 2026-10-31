@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { ToolError, toErrorResult } from '../src/core/errors';
+import { ToolError, readError, toErrorResult } from '../src/core/errors';
 import { MemorySource, SampleSource } from '../src/data/source';
 import { SAMPLE_PLAN, dayInfo, freeFor } from '../src/dayli';
 
@@ -8,16 +8,16 @@ describe('toErrorResult', () => {
   it('keeps the code, message and hint', () => {
     const r = toErrorResult(new ToolError('TASK_NOT_FOUND', 'No task "zzz".', 'Call get_tasks.'));
     assert.equal(r.isError, true);
-    assert.deepEqual(r.structuredContent.error, {
+    assert.equal('structuredContent' in r, false);
+    assert.deepEqual(readError(r), {
       code: 'TASK_NOT_FOUND',
       message: 'No task "zzz".',
       hint: 'Call get_tasks.',
     });
-    assert.equal(r.content[0].text, 'TASK_NOT_FOUND: No task "zzz". Call get_tasks.');
   });
   it('does not leak details of unexpected errors', () => {
     const r = toErrorResult(new Error('ECONNREFUSED 10.0.0.3:5432 password=hunter2'));
-    assert.equal(r.structuredContent.error.code, 'DATA_UNAVAILABLE');
+    assert.equal(readError(r).code, 'DATA_UNAVAILABLE');
     assert.doesNotMatch(r.content[0].text, /hunter2|10\.0\.0\.3/);
   });
 });

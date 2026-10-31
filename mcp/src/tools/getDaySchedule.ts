@@ -111,7 +111,9 @@ export async function getDaySchedule(deps: ToolDeps, input: { day?: string }) {
     const out = buildDaySchedule(plan, day, now, deps.source.name);
     return {
       content: [
-        { type: 'text' as const, text: `${summaryLine(out)}\n\n${JSON.stringify(out, null, 2)}` },
+        // Serialized structured content first, as the MCP spec recommends, then a readable line.
+        { type: 'text' as const, text: JSON.stringify(out) },
+        { type: 'text' as const, text: summaryLine(out) },
       ],
       structuredContent: out,
     };

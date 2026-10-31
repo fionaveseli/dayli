@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { fixedClock } from '../src/core/clock';
+import { readError } from '../src/core/errors';
 import { MemorySource, SampleSource, type PlanSource } from '../src/data/source';
 import { SAMPLE_PLAN, type PlanData } from '../src/dayli';
 import { getDaySchedule } from '../src/tools/getDaySchedule';
@@ -22,8 +23,12 @@ async function ok(source: PlanSource, clock: typeof MONDAY, day?: string) {
 async function err(source: PlanSource, clock: typeof MONDAY, day?: string) {
   const r = await getDaySchedule({ source, clock }, { day });
   assert.ok('isError' in r && r.isError, 'expected an error');
-  return (r as { structuredContent: { error: { code: string; message: string; hint?: string } } })
-    .structuredContent.error;
+  assert.equal(
+    'structuredContent' in r,
+    false,
+    'errors must not be checked against the output schema',
+  );
+  return readError(r);
 }
 
 const sample = new SampleSource();
@@ -136,13 +141,11 @@ describe('get_day_schedule', () => {
     assert.equal(s.summary.free_minutes, 930 - 60);
   });
 
-  it('puts a readable summary and the same data in the text', async () => {
+  it('sends the data as JSON text first, then a readable summary', async () => {
     const r = await ok(sample, MONDAY);
-    const [summary, json] = r.content[0].text.split('\n\n');
-    assert.match(summary, /^Monday 2026-10-26 \(today, now 08:00\)/);
-    assert.match(summary, /Source: sample data\./);
-    assert.deepEqual(JSON.parse(r.content[0].text.slice(summary.length + 2)), r.structuredContent);
-    assert.ok(json.startsWith('{'));
+    assert.deepEqual(JSON.parse(r.content[0].text), r.structuredContent);
+    assert.match(r.content[1].text, /^Monday 2026-10-26 \(today, now 08:00\)/);
+    assert.match(r.content[1].text, /Source: sample data\.$/);
   });
 
   it('refuses days outside this week instead of answering for another day', async () => {

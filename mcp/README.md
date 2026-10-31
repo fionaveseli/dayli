@@ -37,7 +37,7 @@ already worked out by the app's own rules.
 
 Input: `day` (optional, defaults to today). See [Dates](#dates).
 
-Output (also sent as JSON text after a one-line summary, for clients that only read text):
+Output (structured content, also sent as JSON text followed by a one-line summary, for clients that only read text):
 
 | Field         | Meaning                                                                                    |
 | ------------- | ------------------------------------------------------------------------------------------ |
@@ -50,6 +50,8 @@ Output (also sent as JSON text after a one-line summary, for clients that only r
 | `data_source` | where the plan came from, so the agent can say it is sample data                           |
 
 Errors: `DAY_OUT_OF_RANGE`, `AMBIGUOUS_DAY`, `INVALID_DAY`, `DATA_UNAVAILABLE`, each with a hint.
+They come back with `isError: true` as JSON text (`{"error": {"code", "message", "hint"}}`) and no
+structured content, because structured content must match the output schema of a successful result.
 
 ## Run it
 
