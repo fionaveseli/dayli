@@ -39,6 +39,18 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 
 - [ ] **12 [needs you] Supabase project.** Create a free project at supabase.com and put `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` in `.env`.
 - [ ] **13 Schema and sign-in.** Tables and row-level security as migrations, email sign-in, and the store synced to Supabase.
+      Store real calendar dates, so the plan can span weeks and months:
+  - Tasks have a `date` (null = brain dump) and an optional start time, instead of a day index.
+  - Fixed commitments and reminders repeat on weekdays, with `starts_on` and an optional `ends_on` date
+    (a one-off has the same start and end). Reminder done and snooze are stored per date, not per day index.
+  - Every table has `id`, `user_id`, `created_at` and `updated_at` (kept current by a trigger). Row-level
+    security limits every row to its owner, so any client signed in as the user sees only their data.
+    An update sends the `updated_at` it last read and is refused if the row changed since.
+  - Settings include the user's time zone.
+  - Keep `goal_id` and `milestone_id` on tasks as plain nullable columns; task 20 adds their tables.
+  - The screens and `src/rules` keep working with day indexes: the store converts between dates and the
+    current week's day indexes. Move the plan saved on the phone to the new shape (this week's dates).
+  - Not yet: other repeat patterns, goals and milestones tables, history views.
 - [ ] **14 [needs you] AI key.** Add the AI provider key as a Supabase secret (never in the app).
 - [ ] **15 Onboarding.** Welcome, "Tell me what your life looks like" (typed), an Edge Function that turns it into a routine, the review screen, Approve.
 - [ ] **16 Settings.** Working hours, breathing room, daily autopilot, reminders, theme.
@@ -50,7 +62,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 
 # v2 — the bigger picture
 
-- [ ] **20 Goals and milestones.** Goals screen with the milestone timeline; tasks link to a goal and move its progress.
+- [ ] **20 Goals and milestones.** Goals screen with the milestone timeline; tasks link to a goal and move its progress; milestones have a target date.
 - [ ] **21 Life chapters.** Chapter list, chapter detail, and the new-chapter flow from the prototype.
 - [ ] **22 Weekly rhythms.** "Gym 4× a week" creates its sessions on the lightest days each week; move one and the rest stay.
 - [ ] **23 Sunday reset.** A two-minute weekly review: what slipped, next week proposed, approve.
