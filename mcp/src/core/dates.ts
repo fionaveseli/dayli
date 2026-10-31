@@ -103,5 +103,9 @@ export function resolveDay(input: string | undefined, now: LocalNow): DayRef {
     );
   }
 
-  throw new ToolError('INVALID_DAY', `"${input}" is not a day Dayli understands.`, ACCEPTED_DAYS);
+  throw new ToolError(
+    'INVALID_DAY',
+    `"${(input ?? '').trim()}" is not a day Dayli understands.`,
+    ACCEPTED_DAYS,
+  );
 }
