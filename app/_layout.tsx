@@ -16,6 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Autopilot } from '../src/autopilot';
 import { EditorProvider } from '../src/editor';
 import { Notifier } from '../src/notifications';
+import { OnboardedProvider } from '../src/onboarding';
 import { PlanProvider } from '../src/store';
 import { AuthProvider, SyncProvider } from '../src/sync';
 import { ThemeProvider, useTheme } from '../src/theme';
@@ -45,17 +46,19 @@ export default function RootLayout() {
   if (!loaded) return null;
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <PlanProvider>
-          <SyncProvider>
-            <EditorProvider>
-              <Notifier />
-              <Autopilot />
-              <Shell />
-            </EditorProvider>
-          </SyncProvider>
-        </PlanProvider>
-      </AuthProvider>
+      <OnboardedProvider>
+        <AuthProvider>
+          <PlanProvider>
+            <SyncProvider>
+              <EditorProvider>
+                <Notifier />
+                <Autopilot />
+                <Shell />
+              </EditorProvider>
+            </SyncProvider>
+          </PlanProvider>
+        </AuthProvider>
+      </OnboardedProvider>
     </ThemeProvider>
   );
 }

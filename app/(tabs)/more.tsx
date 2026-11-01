@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, Text } from '../../src/components';
+import { useOnboarded } from '../../src/onboarding';
 import { useAuth, useSyncStatus } from '../../src/sync';
 
 const STATUS = {
@@ -16,6 +17,7 @@ export default function MoreScreen() {
   const router = useRouter();
   const { enabled, session, signOut } = useAuth();
   const status = useSyncStatus();
+  const { setDone } = useOnboarded();
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1, padding: 20, gap: 14 }}>
@@ -39,6 +41,20 @@ export default function MoreScreen() {
                 {enabled && <Button label="Sign in" onPress={() => router.push('/sign-in')} />}
               </>
             )}
+          </View>
+        </Card>
+        <Card>
+          <View style={{ gap: 10 }}>
+            <Text variant="h3">Set up again</Text>
+            <Text tone="muted">See the welcome and describe your week again.</Text>
+            <Button
+              label="Replay onboarding"
+              kind="secondary"
+              onPress={() => {
+                setDone(false);
+                router.push('/welcome');
+              }}
+            />
           </View>
         </Card>
       </View>
