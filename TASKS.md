@@ -52,7 +52,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
     current week's day indexes. Move the plan saved on the phone to the new shape (this week's dates).
   - Not yet: other repeat patterns, goals and milestones tables, history views.
 - [ ] **14 [needs you] AI key.** Add the AI provider key as a Supabase secret (never in the app).
-- [ ] **15 Onboarding.** Welcome, "Tell me what your life looks like" (typed), an Edge Function that turns it into a routine, the review screen, Approve.
+- [x] **15 Onboarding.** Welcome, "Tell me what your life looks like" (typed), an Edge Function that turns it into a routine, the review screen, Approve.
 - [ ] **16 Settings.** Working hours, breathing room, daily autopilot, reminders, theme.
 
 ## Ship it to your phone

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 
+import { useOnboarded } from '../../src/onboarding';
 import { fonts, useTheme } from '../../src/theme';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -15,6 +16,8 @@ const TABS: { name: string; title: string; icon: IconName }[] = [
 
 export default function TabsLayout() {
   const { colors } = useTheme();
+  const { ready, done } = useOnboarded();
+  if (ready && !done) return <Redirect href="/welcome" />;
   return (
     <Tabs
       screenOptions={{
