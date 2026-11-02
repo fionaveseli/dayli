@@ -5,3 +5,4 @@ export { Chip } from './Chip';
 export { Segmented } from './Segmented';
 export { Text } from './Text';
 export { Toggle } from './Toggle';
+export { TimeField } from './TimeField';
