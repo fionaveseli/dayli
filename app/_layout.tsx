@@ -11,13 +11,14 @@ import {
   useFonts,
 } from '@expo-google-fonts/newsreader';
 import { Stack } from 'expo-router';
+import type { ReactNode } from 'react';
 import { StatusBar } from 'expo-status-bar';
 
 import { Autopilot } from '../src/autopilot';
 import { EditorProvider } from '../src/editor';
 import { Notifier } from '../src/notifications';
 import { OnboardedProvider } from '../src/onboarding';
-import { PlanProvider } from '../src/store';
+import { PlanProvider, usePlan } from '../src/store';
 import { AuthProvider, SyncProvider } from '../src/sync';
 import { ThemeProvider, useTheme } from '../src/theme';
 
@@ -33,6 +34,16 @@ function Shell() {
   );
 }
 
+/** Light, dark or the phone's own setting, as chosen in Settings. */
+function SettingsTheme({ children }: { children: ReactNode }) {
+  const { settings } = usePlan();
+  return (
+    <ThemeProvider scheme={settings.theme === 'system' ? undefined : settings.theme}>
+      {children}
+    </ThemeProvider>
+  );
+}
+
 export default function RootLayout() {
   const [loaded] = useFonts({
     Newsreader_400Regular,
@@ -45,10 +56,10 @@ export default function RootLayout() {
   });
   if (!loaded) return null;
   return (
-    <ThemeProvider>
-      <OnboardedProvider>
-        <AuthProvider>
-          <PlanProvider>
+    <OnboardedProvider>
+      <AuthProvider>
+        <PlanProvider>
+          <SettingsTheme>
             <SyncProvider>
               <EditorProvider>
                 <Notifier />
@@ -56,9 +67,9 @@ export default function RootLayout() {
                 <Shell />
               </EditorProvider>
             </SyncProvider>
-          </PlanProvider>
-        </AuthProvider>
-      </OnboardedProvider>
-    </ThemeProvider>
+          </SettingsTheme>
+        </PlanProvider>
+      </AuthProvider>
+    </OnboardedProvider>
   );
 }

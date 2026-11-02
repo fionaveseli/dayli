@@ -53,7 +53,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
   - Not yet: other repeat patterns, goals and milestones tables, history views.
 - [ ] **14 [needs you] AI key.** Add the AI provider key as a Supabase secret (never in the app).
 - [x] **15 Onboarding.** Welcome, "Tell me what your life looks like" (typed), an Edge Function that turns it into a routine, the review screen, Approve.
-- [ ] **16 Settings.** Working hours, breathing room, daily autopilot, reminders, theme.
+- [x] **16 Settings.** Working hours, breathing room, daily autopilot, reminders, theme.
 
 ## Ship it to your phone
 
