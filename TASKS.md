@@ -57,7 +57,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 
 ## Ship it to your phone
 
-- [ ] **17 App icon, splash and a test build** with EAS for your phone.
+- [x] **17 App icon, splash and a test build** with EAS for your phone.
 - [ ] **18 [needs you] Store accounts.** Apple Developer and Google Play, when you're ready to publish.
 
 # v2 — the bigger picture
