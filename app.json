@@ -6,8 +6,22 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FAF7F4",
+      "dark": { "image": "./assets/splash-icon.png", "backgroundColor": "#17181C" }
+    },
     "ios": { "supportsTablet": false, "bundleIdentifier": "app.dayli.mobile" },
-    "android": { "package": "app.dayli.mobile" },
+    "android": {
+      "package": "app.dayli.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FAF7F4"
+      }
+    },
+    "web": { "favicon": "./assets/favicon.png" },
     "plugins": ["expo-router", "expo-notifications"],
     "experiments": { "typedRoutes": true }
   }
