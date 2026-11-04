@@ -1,4 +1,4 @@
-import { SAMPLE_PLAN } from '../data/sample';
+import { GOALS0, MILESTONES0, SAMPLE_PLAN } from '../data/sample';
 import type { PlanData } from '../data/types';
 import { fromView, migrateWeekPlan, stripMeta, toView } from './dated';
 import { diffRows, snapshot } from './engine';
@@ -92,6 +92,8 @@ describe('rows and sync', () => {
       fixed_commitments: [],
       reminders: [],
       settings: [],
+      goals: [],
+      milestones: [],
     };
     for (const r of toRows(plan)) {
       db[r.table].push({
@@ -111,6 +113,21 @@ describe('rows and sync', () => {
     expect(toView(back, MON).tasks).toEqual(SAMPLE_PLAN.tasks);
     expect(toView(back, MON).fixed).toEqual(SAMPLE_PLAN.fixed);
     expect(back.tasks[0].updatedAt).toBe('2026-11-02T08:00:00.000000+00:00');
+  });
+
+  it('round-trips goals and milestones, and sends goals before their milestones', () => {
+    const dated = { ...migrateWeekPlan(SAMPLE_PLAN, MON), goals: GOALS0, milestones: MILESTONES0 };
+    const rows = toRows(dated);
+    const back = fromRows(server(dated));
+    expect(back.goals.map(({ userId: _u, createdAt: _c, updatedAt: _a, ...g }) => g)).toEqual(
+      GOALS0,
+    );
+    expect(back.milestones.map(({ userId: _u, createdAt: _c, updatedAt: _a, ...m }) => m)).toEqual(
+      MILESTONES0,
+    );
+    const first = (t: string) => rows.findIndex((r) => r.table === t);
+    expect(first('goals')).toBeLessThan(first('milestones'));
+    expect(first('milestones')).toBeLessThan(first('tasks'));
   });
 
   it('sends everything as new on first sync, then only what changed', () => {

@@ -47,6 +47,29 @@ export type Reminder = {
   snooze?: Record<number, number>;
 };
 
+/** A bigger thing the user is working toward. `due` is a local `YYYY-MM-DD` date, or null for ongoing. */
+export type Goal = {
+  id: string;
+  title: string;
+  /** Short name for chips. */
+  short: string;
+  why: string;
+  cat: Category;
+  due: string | null;
+};
+
+/** A step on the way to a goal, with a soft target date. */
+export type Milestone = {
+  id: string;
+  goalId: string;
+  title: string;
+  due: string | null;
+  /** Marks a milestone reached when it has no tasks to count. */
+  done: boolean;
+  /** Order within the goal. */
+  pos: number;
+};
+
 export type Settings = {
   theme: 'system' | 'light' | 'dark';
   wake: number;

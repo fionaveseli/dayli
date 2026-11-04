@@ -45,6 +45,13 @@ export default function MoreScreen() {
         </Card>
         <Card>
           <View style={{ gap: 10 }}>
+            <Text variant="h3">Goals and milestones</Text>
+            <Text tone="muted">Steps toward the bigger things.</Text>
+            <Button label="Open goals" kind="secondary" onPress={() => router.push('/goals')} />
+          </View>
+        </Card>
+        <Card>
+          <View style={{ gap: 10 }}>
             <Text variant="h3">Settings</Text>
             <Text tone="muted">Hours, rest, autopilot, reminders and theme.</Text>
             <Button

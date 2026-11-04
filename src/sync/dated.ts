@@ -1,4 +1,14 @@
-import type { Autopilot, DayIndex, Fixed, PlanData, Reminder, Settings, Task } from '../data/types';
+import type {
+  Autopilot,
+  DayIndex,
+  Fixed,
+  Goal,
+  Milestone,
+  PlanData,
+  Reminder,
+  Settings,
+  Task,
+} from '../data/types';
 import { addKey, type DateKey } from './dates';
 
 /** What the server tells us about a row; the screens never see it. */
@@ -16,18 +26,29 @@ export type DatedReminder = Omit<Reminder, 'doneDays' | 'snooze'> & {
   snoozeOn: Record<DateKey, number>;
 } & Meta;
 
+export type DatedGoal = Goal & Meta;
+export type DatedMilestone = Milestone & Meta;
+
 /** The plan as it is stored and synced: real dates, no week-relative day indexes. */
 export type DatedPlan = {
   fixed: DatedFixed[];
   tasks: DatedTask[];
   reminders: DatedReminder[];
+  goals: DatedGoal[];
+  milestones: DatedMilestone[];
   settings: Settings;
   settingsId?: string;
   settingsMeta?: Meta;
   autopilot?: Autopilot;
 };
 
-export const EMPTY_DATED: Omit<DatedPlan, 'settings'> = { fixed: [], tasks: [], reminders: [] };
+export const EMPTY_DATED: Omit<DatedPlan, 'settings'> = {
+  fixed: [],
+  tasks: [],
+  reminders: [],
+  goals: [],
+  milestones: [],
+};
 
 const META_KEYS = ['userId', 'createdAt', 'updatedAt'] as const;
 
@@ -64,6 +85,8 @@ export function stripMeta(p: DatedPlan): DatedPlan {
     fixed: p.fixed.map((x) => ({ ...x, ...blankMeta })),
     tasks: p.tasks.map((x) => ({ ...x, ...blankMeta })),
     reminders: p.reminders.map((x) => ({ ...x, ...blankMeta })),
+    goals: p.goals.map((x) => ({ ...x, ...blankMeta })),
+    milestones: p.milestones.map((x) => ({ ...x, ...blankMeta })),
   };
 }
 const blankMeta: Meta = { userId: undefined, createdAt: undefined, updatedAt: undefined };
