@@ -62,7 +62,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 
 # v2 — the bigger picture
 
-- [ ] **20 Goals and milestones.** Goals screen with the milestone timeline; tasks link to a goal and move its progress; milestones have a target date.
+- [x] **20 Goals and milestones.** Goals screen with the milestone timeline; tasks link to a goal and move its progress; milestones have a target date.
 - [ ] **21 Life chapters.** Chapter list, chapter detail, and the new-chapter flow from the prototype.
 - [ ] **22 Weekly rhythms.** "Gym 4× a week" creates its sessions on the lightest days each week; move one and the rest stay.
 - [ ] **23 Sunday reset.** A two-minute weekly review: what slipped, next week proposed, approve.

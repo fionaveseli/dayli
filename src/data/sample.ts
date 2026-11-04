@@ -1,4 +1,4 @@
-import type { Category, Fixed, PlanData, Reminder, Settings, Task } from './types';
+import type { Category, Fixed, Goal, Milestone, PlanData, Reminder, Settings, Task } from './types';
 
 export const SETTINGS0: Settings = {
   theme: 'system',
@@ -228,3 +228,52 @@ export const SAMPLE_PLAN: PlanData = {
   reminders: REM0,
   settings: SETTINGS0,
 };
+
+export const GOALS0: Goal[] = [
+  {
+    id: 'g1',
+    title: 'Find a remote software engineering job by January',
+    short: 'Remote job by January',
+    why: 'Better pay, calmer days, and the freedom to work from anywhere.',
+    cat: 'interview',
+    due: '2027-01-31',
+  },
+  {
+    id: 'g2',
+    title: 'Deliver the Blue Bamboo learning platform',
+    short: 'Blue Bamboo delivery',
+    why: 'A client project to be proud of, and the strongest case study for the portfolio.',
+    cat: 'client',
+    due: '2026-12-12',
+  },
+  {
+    id: 'g3',
+    title: 'Train four times a week',
+    short: 'Four workouts a week',
+    why: 'Energy for everything else.',
+    cat: 'fitness',
+    due: null,
+  },
+];
+
+const M = (
+  id: string,
+  goalId: string,
+  pos: number,
+  title: string,
+  due: string | null,
+  done = false,
+): Milestone => ({ id, goalId, pos, title, due, done });
+
+export const MILESTONES0: Milestone[] = [
+  M('m1', 'g1', 0, 'Finish portfolio', '2026-11-15'),
+  M('m2', 'g1', 1, 'Publish portfolio', '2026-11-30'),
+  M('m3', 'g1', 2, 'Prepare for interviews', '2026-12-20'),
+  M('m4', 'g1', 3, 'Apply to remote jobs', '2027-01-31'),
+  M('b1', 'g2', 0, 'Landing page live', '2026-10-05', true),
+  M('b2', 'g2', 1, 'Polish the learning canvas', '2026-11-20'),
+  M('b3', 'g2', 2, 'Hand over to the client', '2026-12-12'),
+  M('h1', 'g3', 0, 'Build the habit', '2026-09-30', true),
+  M('h2', 'g3', 1, 'Hold it through November', '2026-11-30'),
+  M('h3', 'g3', 2, 'Run a 10K in spring', '2027-04-30'),
+];

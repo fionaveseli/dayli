@@ -9,13 +9,22 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { SAMPLE_PLAN } from '../data/sample';
+import { GOALS0, MILESTONES0, SAMPLE_PLAN } from '../data/sample';
 import { moveTask as moveT, placeTask as placeT, unplaceTask as unplaceT } from '../rules/calendar';
 import { dateKey, rolloverFor } from '../rules/autopilot';
 import { snoozeReminder as snoozeR } from '../notifications/plan';
 import { mondayKey } from '../sync/dates';
 import { fromView, migrateWeekPlan, toView, type DatedPlan } from '../sync/dated';
-import type { DayIndex, PlanData, Reminder, Settings, Task, Fixed } from '../data/types';
+import type {
+  DayIndex,
+  Fixed,
+  Goal,
+  Milestone,
+  PlanData,
+  Reminder,
+  Settings,
+  Task,
+} from '../data/types';
 
 /** The first shape: day indexes of one week. Read once to move it to the dated shape. */
 export const LEGACY_KEY = 'dayli.plan.v1';
@@ -31,10 +40,16 @@ const zone = () => {
 };
 const withZone = (d: DatedPlan): DatedPlan =>
   d.settings.timeZone ? d : { ...d, settings: { ...d.settings, timeZone: zone() } };
-const initial = () => withZone(migrateWeekPlan(SAMPLE_PLAN, thisMonday()));
+const initial = (): DatedPlan => ({
+  ...withZone(migrateWeekPlan(SAMPLE_PLAN, thisMonday())),
+  goals: GOALS0,
+  milestones: MILESTONES0,
+});
 
 export type PlanStore = PlanData & {
   ready: boolean;
+  goals: Goal[];
+  milestones: Milestone[];
   /** The plan with real dates, as it is saved and synced. */
   dated: DatedPlan;
   setDated: (f: (d: DatedPlan) => DatedPlan) => void;
@@ -43,6 +58,12 @@ export type PlanStore = PlanData & {
   setFixed: (f: (fs: Fixed[]) => Fixed[]) => void;
   setReminders: (f: (rs: Reminder[]) => Reminder[]) => void;
   setSettings: (patch: Partial<Settings>) => void;
+  setGoals: (f: (gs: Goal[]) => Goal[]) => void;
+  setMilestones: (f: (ms: Milestone[]) => Milestone[]) => void;
+  /** Remove a goal, its milestones, and the links tasks had to them. */
+  deleteGoal: (id: string) => void;
+  /** Remove a milestone and the links tasks had to it. */
+  deleteMilestone: (id: string) => void;
   toggleTask: (id: string) => void;
   toggleReminder: (id: string, day: DayIndex) => void;
   markReminderDone: (id: string, day: DayIndex) => void;
@@ -116,6 +137,35 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   const setSettings = useCallback(
     (patch: Partial<Settings>) => setPlan((p) => ({ ...p, settings: { ...p.settings, ...patch } })),
     [setPlan],
+  );
+  const setGoals = useCallback(
+    (f: (gs: Goal[]) => Goal[]) =>
+      setDated((d) => ({ ...d, goals: f(d.goals) as DatedPlan['goals'] })),
+    [],
+  );
+  const setMilestones = useCallback(
+    (f: (ms: Milestone[]) => Milestone[]) =>
+      setDated((d) => ({ ...d, milestones: f(d.milestones) as DatedPlan['milestones'] })),
+    [],
+  );
+  const deleteGoal = useCallback(
+    (id: string) =>
+      setDated((d) => ({
+        ...d,
+        goals: d.goals.filter((g) => g.id !== id),
+        milestones: d.milestones.filter((m) => m.goalId !== id),
+        tasks: d.tasks.map((t) => (t.goal === id ? { ...t, goal: null, ms: null } : t)),
+      })),
+    [],
+  );
+  const deleteMilestone = useCallback(
+    (id: string) =>
+      setDated((d) => ({
+        ...d,
+        milestones: d.milestones.filter((m) => m.id !== id),
+        tasks: d.tasks.map((t) => (t.ms === id ? { ...t, ms: null } : t)),
+      })),
+    [],
   );
   const toggleTask = useCallback(
     (id: string) => setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, done: !t.done } : t))),
@@ -199,6 +249,8 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     () => ({
       ...plan,
       ready,
+      goals: dated.goals,
+      milestones: dated.milestones,
       dated,
       setDated,
       apply,
@@ -206,6 +258,10 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       setFixed,
       setReminders,
       setSettings,
+      setGoals,
+      setMilestones,
+      deleteGoal,
+      deleteMilestone,
       toggleTask,
       toggleReminder,
       markReminderDone,
@@ -228,6 +284,10 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       setFixed,
       setReminders,
       setSettings,
+      setGoals,
+      setMilestones,
+      deleteGoal,
+      deleteMilestone,
       toggleTask,
       toggleReminder,
       markReminderDone,

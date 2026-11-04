@@ -12,7 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Chip, Segmented, Text, TimeField, Toggle } from '../components';
-import { CATS, DAYS, fmtD, fmtT } from '../rules';
+import { CATS, DAYS, fmtD, fmtT, goalInfo } from '../rules';
 import { fonts, hit, radii, spacing, useTheme } from '../theme';
 import type { Category } from '../data/types';
 import { usePlan } from '../store';
@@ -156,6 +156,16 @@ export function Editor({
   const set = (p: Partial<Form>) => setF((o) => ({ ...o, ...p }));
   const editing = !!target;
   const at = f.time - f.lead;
+  const linked = f.goal ? plan.goals.find((g) => g.id === f.goal) : undefined;
+  const linkedInfo = linked ? goalInfo(linked, plan.milestones, plan.tasks) : undefined;
+  const pickGoal = (id: string | null) => {
+    const g = id ? plan.goals.find((x) => x.id === id) : undefined;
+    // A goal brings its current milestone along, so the task moves it forward.
+    set({
+      goal: id,
+      ms: g ? (goalInfo(g, plan.milestones, plan.tasks).next?.id ?? null) : null,
+    });
+  };
 
   const save = () => {
     plan.apply((p) => saveForm(p, target, f));
@@ -382,6 +392,41 @@ export function Editor({
                     multiline
                   />
                 </Field>
+                {f.kind === 'flex' && plan.goals.length > 0 && (
+                  <Field
+                    label="Related goal"
+                    hint={
+                      linkedInfo && f.ms
+                        ? 'Ticking this off moves the milestone forward.'
+                        : undefined
+                    }
+                  >
+                    <Chips>
+                      <Chip label="None" on={!f.goal} onPress={() => pickGoal(null)} />
+                      {plan.goals.map((g) => (
+                        <Chip
+                          key={g.id}
+                          label={g.short || g.title}
+                          tone={CATS[g.cat].tone}
+                          on={f.goal === g.id}
+                          onPress={() => pickGoal(g.id)}
+                        />
+                      ))}
+                    </Chips>
+                    {linkedInfo && linkedInfo.milestones.length > 0 && (
+                      <Chips>
+                        {linkedInfo.milestones.map((m) => (
+                          <Chip
+                            key={m.id}
+                            label={m.title}
+                            on={f.ms === m.id}
+                            onPress={() => set({ ms: m.id })}
+                          />
+                        ))}
+                      </Chips>
+                    )}
+                  </Field>
+                )}
                 {f.kind === 'flex' && (
                   <Field label="Priority">
                     <Segmented

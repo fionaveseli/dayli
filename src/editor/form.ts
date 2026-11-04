@@ -14,6 +14,9 @@ export type Form = {
   day: DayIndex | null;
   repeat: boolean;
   pri: number;
+  /** Flexible: the goal and milestone it moves forward. */
+  goal: string | null;
+  ms: string | null;
   /** Fixed and reminder: the days it happens on. */
   days: DayIndex[];
   start: number;
@@ -34,6 +37,8 @@ export function blankForm(plan: PlanData, defaults: Partial<Form> = {}): Form {
     day: 0,
     repeat: false,
     pri: 2,
+    goal: null,
+    ms: null,
     days: [0],
     start: 1080,
     end: 1140,
@@ -63,6 +68,8 @@ export function formFor(plan: PlanData, target: EditorTarget): Form {
       day: t.day,
       repeat: t.repeat,
       pri: t.pri,
+      goal: t.goal,
+      ms: t.ms,
       days: [t.day != null && t.day >= 0 ? t.day : 0],
       start,
       end: start + t.dur,
@@ -133,13 +140,15 @@ export function saveForm(plan: PlanData, target: EditorTarget, f: Form): PlanDat
       day: f.day,
       repeat: f.repeat,
       pri: f.pri,
+      goal: f.goal,
+      ms: f.goal ? f.ms : null,
     };
     if (same) {
       tasks = tasks.map((t) =>
         t.id === target!.id ? { ...t, ...patch, time: f.day !== t.day ? null : t.time } : t,
       );
     } else {
-      const t: Task = { id: newId('t'), done: false, time: null, goal: null, ms: null, ...patch };
+      const t: Task = { id: newId('t'), done: false, time: null, ...patch };
       tasks = [...tasks, t];
     }
   } else if (f.kind === 'fixed') {

@@ -1,9 +1,26 @@
 import type { Settings } from '../data/types';
 import { SETTINGS0 } from '../data/sample';
-import type { DatedFixed, DatedPlan, DatedReminder, DatedTask, Meta } from './dated';
+import type {
+  DatedFixed,
+  DatedGoal,
+  DatedMilestone,
+  DatedPlan,
+  DatedReminder,
+  DatedTask,
+  Meta,
+} from './dated';
 
-export type Table = 'tasks' | 'fixed_commitments' | 'reminders' | 'settings';
-export const TABLES: Table[] = ['settings', 'fixed_commitments', 'reminders', 'tasks'];
+export type Table =
+  'tasks' | 'fixed_commitments' | 'reminders' | 'settings' | 'goals' | 'milestones';
+/** Goals come before milestones and tasks, which point at them. */
+export const TABLES: Table[] = [
+  'settings',
+  'fixed_commitments',
+  'reminders',
+  'goals',
+  'milestones',
+  'tasks',
+];
 
 /** A database row as sent (`content`) plus what the server added (`meta`). */
 export type Row = { table: Table; id: string; content: Record<string, unknown>; meta: Meta };
@@ -71,6 +88,34 @@ export function toRows(p: DatedPlan): Row[] {
         snooze: r.snoozeOn,
       },
     });
+  for (const g of p.goals)
+    rows.push({
+      table: 'goals',
+      id: g.id,
+      meta: g,
+      content: {
+        id: g.id,
+        title: g.title,
+        short: g.short,
+        why: g.why,
+        cat: g.cat,
+        due_on: g.due,
+      },
+    });
+  for (const m of p.milestones)
+    rows.push({
+      table: 'milestones',
+      id: m.id,
+      meta: m,
+      content: {
+        id: m.id,
+        goal_id: m.goalId,
+        title: m.title,
+        due_on: m.due,
+        done: m.done,
+        pos: m.pos,
+      },
+    });
   for (const t of p.tasks)
     rows.push({
       table: 'tasks',
@@ -97,6 +142,8 @@ export function toRows(p: DatedPlan): Row[] {
 
 /** Rebuild the plan from what the server holds. */
 export function fromRows(db: Record<Table, DbRow[]>): DatedPlan {
+  const goals = db.goals ?? [];
+  const milestones = db.milestones ?? [];
   const s = db.settings[0];
   const settings: Settings = {
     ...SETTINGS0,
@@ -136,6 +183,24 @@ export function fromRows(db: Record<Table, DbRow[]>): DatedPlan {
       snoozeOn: (r.snooze as Record<string, number>) ?? {},
       ...metaOf(r),
     })),
+    goals: goals.map((r): DatedGoal => ({
+      id: r.id,
+      title: r.title as string,
+      short: r.short as string,
+      why: r.why as string,
+      cat: r.cat as DatedGoal['cat'],
+      due: (r.due_on as string | null) ?? null,
+      ...metaOf(r),
+    })),
+    milestones: milestones.map((r): DatedMilestone => ({
+      id: r.id,
+      goalId: r.goal_id as string,
+      title: r.title as string,
+      due: (r.due_on as string | null) ?? null,
+      done: r.done as boolean,
+      pos: r.pos as number,
+      ...metaOf(r),
+    })),
     tasks: db.tasks.map((r): DatedTask => ({
       id: r.id,
       title: r.title as string,
@@ -169,10 +234,12 @@ export function applyMeta(p: DatedPlan, metas: Map<string, Meta & { id?: string 
     fixed: set('fixed_commitments', p.fixed),
     reminders: set('reminders', p.reminders),
     tasks: set('tasks', p.tasks),
+    goals: set('goals', p.goals),
+    milestones: set('milestones', p.milestones),
     ...(sv ? { settingsId: sv.id, settingsMeta: sv } : {}),
   };
 }
 
 export function hasRows(db: Record<Table, DbRow[]>) {
-  return TABLES.some((t) => db[t].length > 0);
+  return TABLES.some((t) => (db[t] ?? []).length > 0);
 }
