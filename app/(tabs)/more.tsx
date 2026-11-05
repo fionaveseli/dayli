@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Card, Text } from '../../src/components';
@@ -20,7 +20,7 @@ export default function MoreScreen() {
   const { setDone } = useOnboarded();
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ flex: 1, padding: 20, gap: 14 }}>
+      <ScrollView contentContainerStyle={{ padding: 20, gap: 14 }}>
         <Text variant="h1">More</Text>
         <Card>
           <View style={{ gap: 10 }}>
@@ -52,6 +52,17 @@ export default function MoreScreen() {
         </Card>
         <Card>
           <View style={{ gap: 10 }}>
+            <Text variant="h3">Life chapters</Text>
+            <Text tone="muted">Semesters, sprints, resets.</Text>
+            <Button
+              label="Open chapters"
+              kind="secondary"
+              onPress={() => router.push('/chapters')}
+            />
+          </View>
+        </Card>
+        <Card>
+          <View style={{ gap: 10 }}>
             <Text variant="h3">Settings</Text>
             <Text tone="muted">Hours, rest, autopilot, reminders and theme.</Text>
             <Button
@@ -75,7 +86,7 @@ export default function MoreScreen() {
             />
           </View>
         </Card>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
