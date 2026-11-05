@@ -9,13 +9,14 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { GOALS0, MILESTONES0, SAMPLE_PLAN } from '../data/sample';
+import { CHAPTERS0, GOALS0, MILESTONES0, SAMPLE_PLAN } from '../data/sample';
 import { moveTask as moveT, placeTask as placeT, unplaceTask as unplaceT } from '../rules/calendar';
 import { dateKey, rolloverFor } from '../rules/autopilot';
 import { snoozeReminder as snoozeR } from '../notifications/plan';
 import { mondayKey } from '../sync/dates';
 import { fromView, migrateWeekPlan, toView, type DatedPlan } from '../sync/dated';
 import type {
+  Chapter,
   DayIndex,
   Fixed,
   Goal,
@@ -42,12 +43,14 @@ const withZone = (d: DatedPlan): DatedPlan =>
   d.settings.timeZone ? d : { ...d, settings: { ...d.settings, timeZone: zone() } };
 const initial = (): DatedPlan => ({
   ...withZone(migrateWeekPlan(SAMPLE_PLAN, thisMonday())),
+  chapters: CHAPTERS0,
   goals: GOALS0,
   milestones: MILESTONES0,
 });
 
 export type PlanStore = PlanData & {
   ready: boolean;
+  chapters: Chapter[];
   goals: Goal[];
   milestones: Milestone[];
   /** The plan with real dates, as it is saved and synced. */
@@ -58,6 +61,9 @@ export type PlanStore = PlanData & {
   setFixed: (f: (fs: Fixed[]) => Fixed[]) => void;
   setReminders: (f: (rs: Reminder[]) => Reminder[]) => void;
   setSettings: (patch: Partial<Settings>) => void;
+  setChapters: (f: (cs: Chapter[]) => Chapter[]) => void;
+  /** Remove a chapter; its goals stay, no longer in a chapter. */
+  deleteChapter: (id: string) => void;
   setGoals: (f: (gs: Goal[]) => Goal[]) => void;
   setMilestones: (f: (ms: Milestone[]) => Milestone[]) => void;
   /** Remove a goal, its milestones, and the links tasks had to them. */
@@ -137,6 +143,20 @@ export function PlanProvider({ children }: { children: ReactNode }) {
   const setSettings = useCallback(
     (patch: Partial<Settings>) => setPlan((p) => ({ ...p, settings: { ...p.settings, ...patch } })),
     [setPlan],
+  );
+  const setChapters = useCallback(
+    (f: (cs: Chapter[]) => Chapter[]) =>
+      setDated((d) => ({ ...d, chapters: f(d.chapters ?? []) as DatedPlan['chapters'] })),
+    [],
+  );
+  const deleteChapter = useCallback(
+    (id: string) =>
+      setDated((d) => ({
+        ...d,
+        chapters: (d.chapters ?? []).filter((c) => c.id !== id),
+        goals: d.goals.map((g) => (g.chapterId === id ? { ...g, chapterId: null } : g)),
+      })),
+    [],
   );
   const setGoals = useCallback(
     (f: (gs: Goal[]) => Goal[]) =>
@@ -249,6 +269,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     () => ({
       ...plan,
       ready,
+      chapters: dated.chapters ?? [],
       goals: dated.goals,
       milestones: dated.milestones,
       dated,
@@ -258,6 +279,8 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       setFixed,
       setReminders,
       setSettings,
+      setChapters,
+      deleteChapter,
       setGoals,
       setMilestones,
       deleteGoal,
@@ -284,6 +307,8 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       setFixed,
       setReminders,
       setSettings,
+      setChapters,
+      deleteChapter,
       setGoals,
       setMilestones,
       deleteGoal,

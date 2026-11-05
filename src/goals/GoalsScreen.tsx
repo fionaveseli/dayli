@@ -202,7 +202,7 @@ export function GoalsScreen() {
 
   const addGoal = (g: Pick<Goal, 'title' | 'why' | 'cat' | 'due'>) => {
     const id = newId('g');
-    plan.setGoals((gs) => [...gs, { id, short: g.title.slice(0, 28), ...g }]);
+    plan.setGoals((gs) => [...gs, { id, short: g.title.slice(0, 28), chapterId: null, ...g }]);
     setPicked(id);
     setOpen(null);
     setMode(null);
