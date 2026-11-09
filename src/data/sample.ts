@@ -1,4 +1,14 @@
-import type { Category, Fixed, Goal, Milestone, PlanData, Reminder, Settings, Task } from './types';
+import type {
+  Category,
+  Chapter,
+  Fixed,
+  Goal,
+  Milestone,
+  PlanData,
+  Reminder,
+  Settings,
+  Task,
+} from './types';
 
 export const SETTINGS0: Settings = {
   theme: 'system',
@@ -237,6 +247,7 @@ export const GOALS0: Goal[] = [
     why: 'Better pay, calmer days, and the freedom to work from anywhere.',
     cat: 'interview',
     due: '2027-01-31',
+    chapterId: 'c1',
   },
   {
     id: 'g2',
@@ -245,6 +256,7 @@ export const GOALS0: Goal[] = [
     why: 'A client project to be proud of, and the strongest case study for the portfolio.',
     cat: 'client',
     due: '2026-12-12',
+    chapterId: 'c1',
   },
   {
     id: 'g3',
@@ -253,6 +265,7 @@ export const GOALS0: Goal[] = [
     why: 'Energy for everything else.',
     cat: 'fitness',
     due: null,
+    chapterId: 'c1',
   },
 ];
 
@@ -276,4 +289,58 @@ export const MILESTONES0: Milestone[] = [
   M('h1', 'g3', 0, 'Build the habit', '2026-09-30', true),
   M('h2', 'g3', 1, 'Hold it through November', '2026-11-30'),
   M('h3', 'g3', 2, 'Run a 10K in spring', '2027-04-30'),
+];
+
+export const CHAPTERS0: Chapter[] = [
+  {
+    id: 'c1',
+    name: 'The Remote Job Era',
+    start: '2026-09-01',
+    end: '2027-01-31',
+    color: 'blush',
+    desc: 'Keep the day job steady, deliver client work well, and land a higher-paying remote engineering role, without giving up training.',
+    summary: '',
+    rhythm: [
+      { title: 'Blue Bamboo client work', cat: 'client', freq: 3, dur: 90 },
+      { title: 'Portfolio', cat: 'portfolio', freq: 2, dur: 90 },
+      { title: 'Interview prep', cat: 'interview', freq: 1, dur: 60 },
+      { title: 'Fitness', cat: 'fitness', freq: 4, dur: 60 },
+    ],
+  },
+  {
+    id: 'c2',
+    name: 'Launch My Business',
+    start: '2027-02-01',
+    end: '2027-07-31',
+    color: 'peach',
+    desc: 'Turn the side projects into a small product studio. One product, the first paying customers.',
+    summary: '',
+    rhythm: [],
+  },
+  {
+    id: 'c3',
+    name: 'Summer Reset',
+    start: '2026-06-15',
+    end: '2026-08-31',
+    color: 'sage',
+    desc: 'Slow mornings, long walks, more reading, earlier nights.',
+    summary: '41 walks and 9 books.',
+    rhythm: [
+      { title: 'Morning walk', cat: 'fitness', freq: 5, dur: 40 },
+      { title: 'Reading', cat: 'personal', freq: 4, dur: 30 },
+    ],
+  },
+  {
+    id: 'c4',
+    name: 'Fall University Semester',
+    start: '2025-10-01',
+    end: '2026-01-31',
+    color: 'powder',
+    desc: 'The final semester next to a full-time job: evening classes, a thesis, and two seminars.',
+    summary: 'Thesis submitted on time.',
+    rhythm: [
+      { title: 'Thesis writing', cat: 'portfolio', freq: 3, dur: 120 },
+      { title: 'Evening classes', cat: 'work', freq: 3, dur: 120 },
+    ],
+  },
 ];

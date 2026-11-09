@@ -56,6 +56,8 @@ export type Goal = {
   why: string;
   cat: Category;
   due: string | null;
+  /** The chapter it belongs to, if any. */
+  chapterId: string | null;
 };
 
 /** A step on the way to a goal, with a soft target date. */
@@ -68,6 +70,22 @@ export type Milestone = {
   done: boolean;
   /** Order within the goal. */
   pos: number;
+};
+
+/** What a chapter repeats each week; task 22 turns these into sessions. */
+export type RhythmItem = { title: string; cat: Category; freq: number; dur: number };
+
+/** A stretch of time with its own goals and rhythm. Dates are local `YYYY-MM-DD`. */
+export type Chapter = {
+  id: string;
+  name: string;
+  start: string;
+  end: string;
+  color: 'powder' | 'sage' | 'lav' | 'peach' | 'butter' | 'blush';
+  desc: string;
+  /** How a closed chapter went. */
+  summary: string;
+  rhythm: RhythmItem[];
 };
 
 export type Settings = {

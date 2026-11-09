@@ -1,6 +1,7 @@
 import type { Settings } from '../data/types';
 import { SETTINGS0 } from '../data/sample';
 import type {
+  DatedChapter,
   DatedFixed,
   DatedGoal,
   DatedMilestone,
@@ -11,12 +12,13 @@ import type {
 } from './dated';
 
 export type Table =
-  'tasks' | 'fixed_commitments' | 'reminders' | 'settings' | 'goals' | 'milestones';
-/** Goals come before milestones and tasks, which point at them. */
+  'tasks' | 'fixed_commitments' | 'reminders' | 'settings' | 'chapters' | 'goals' | 'milestones';
+/** Chapters come before goals, which come before milestones and tasks: each points at the one before. */
 export const TABLES: Table[] = [
   'settings',
   'fixed_commitments',
   'reminders',
+  'chapters',
   'goals',
   'milestones',
   'tasks',
@@ -88,6 +90,22 @@ export function toRows(p: DatedPlan): Row[] {
         snooze: r.snoozeOn,
       },
     });
+  for (const c of p.chapters)
+    rows.push({
+      table: 'chapters',
+      id: c.id,
+      meta: c,
+      content: {
+        id: c.id,
+        name: c.name,
+        starts_on: c.start,
+        ends_on: c.end,
+        color: c.color,
+        descr: c.desc,
+        summary: c.summary,
+        rhythm: c.rhythm,
+      },
+    });
   for (const g of p.goals)
     rows.push({
       table: 'goals',
@@ -100,6 +118,7 @@ export function toRows(p: DatedPlan): Row[] {
         why: g.why,
         cat: g.cat,
         due_on: g.due,
+        chapter_id: g.chapterId,
       },
     });
   for (const m of p.milestones)
@@ -142,6 +161,7 @@ export function toRows(p: DatedPlan): Row[] {
 
 /** Rebuild the plan from what the server holds. */
 export function fromRows(db: Record<Table, DbRow[]>): DatedPlan {
+  const chapters = db.chapters ?? [];
   const goals = db.goals ?? [];
   const milestones = db.milestones ?? [];
   const s = db.settings[0];
@@ -183,6 +203,17 @@ export function fromRows(db: Record<Table, DbRow[]>): DatedPlan {
       snoozeOn: (r.snooze as Record<string, number>) ?? {},
       ...metaOf(r),
     })),
+    chapters: chapters.map((r): DatedChapter => ({
+      id: r.id,
+      name: r.name as string,
+      start: r.starts_on as string,
+      end: r.ends_on as string,
+      color: r.color as DatedChapter['color'],
+      desc: r.descr as string,
+      summary: r.summary as string,
+      rhythm: (r.rhythm as DatedChapter['rhythm']) ?? [],
+      ...metaOf(r),
+    })),
     goals: goals.map((r): DatedGoal => ({
       id: r.id,
       title: r.title as string,
@@ -190,6 +221,7 @@ export function fromRows(db: Record<Table, DbRow[]>): DatedPlan {
       why: r.why as string,
       cat: r.cat as DatedGoal['cat'],
       due: (r.due_on as string | null) ?? null,
+      chapterId: (r.chapter_id as string | null) ?? null,
       ...metaOf(r),
     })),
     milestones: milestones.map((r): DatedMilestone => ({
@@ -234,6 +266,7 @@ export function applyMeta(p: DatedPlan, metas: Map<string, Meta & { id?: string 
     fixed: set('fixed_commitments', p.fixed),
     reminders: set('reminders', p.reminders),
     tasks: set('tasks', p.tasks),
+    chapters: set('chapters', p.chapters),
     goals: set('goals', p.goals),
     milestones: set('milestones', p.milestones),
     ...(sv ? { settingsId: sv.id, settingsMeta: sv } : {}),
