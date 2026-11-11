@@ -5,3 +5,4 @@ export * from './calendar';
 export * from './autopilot';
 export * from './goals';
 export * from './chapters';
+export * from './rhythm';

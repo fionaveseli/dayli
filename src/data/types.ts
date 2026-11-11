@@ -72,7 +72,7 @@ export type Milestone = {
   pos: number;
 };
 
-/** What a chapter repeats each week; task 22 turns these into sessions. */
+/** What a chapter repeats each week: `freq` sessions of `dur` minutes, placed on the lightest days. */
 export type RhythmItem = { title: string; cat: Category; freq: number; dur: number };
 
 /** A stretch of time with its own goals and rhythm. Dates are local `YYYY-MM-DD`. */
@@ -120,6 +120,8 @@ export type Autopilot = {
   approved?: { date: string; at: number };
   /** The last day whose unfinished tasks were moved forward (or left on purpose). */
   rolledThrough?: string;
+  /** The Monday of the last week whose rhythm sessions were created. */
+  rhythmWeek?: string;
 };
 
 export type PlanData = {

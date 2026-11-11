@@ -12,6 +12,7 @@ import {
 import { CHAPTERS0, GOALS0, MILESTONES0, SAMPLE_PLAN } from '../data/sample';
 import { moveTask as moveT, placeTask as placeT, unplaceTask as unplaceT } from '../rules/calendar';
 import { dateKey, rolloverFor } from '../rules/autopilot';
+import { rhythmFor } from '../rules/rhythm';
 import { snoozeReminder as snoozeR } from '../notifications/plan';
 import { mondayKey } from '../sync/dates';
 import { fromView, migrateWeekPlan, toView, type DatedPlan } from '../sync/dated';
@@ -81,6 +82,8 @@ export type PlanStore = PlanData & {
   unapprovePlan: () => void;
   /** Move unfinished tasks of days that have ended to the next day with room. */
   runRollover: (now: Date) => void;
+  /** Create this week's sessions for the current chapters' rhythms, once per week. */
+  runRhythm: (now: Date) => void;
   /** Mark ended days as handled without moving anything. */
   skipRollover: (through: string) => void;
   reset: () => void;
@@ -258,6 +261,21 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       }),
     [setPlan],
   );
+  const runRhythm = useCallback(
+    (now: Date) =>
+      setDated((d) => {
+        const m = thisMonday();
+        const p = toView(d, m);
+        const r = rhythmFor(p, d.chapters ?? [], now, m);
+        if (!r) return d;
+        return fromView(
+          d,
+          { ...p, tasks: r.tasks, autopilot: { ...p.autopilot, rhythmWeek: m } },
+          m,
+        );
+      }),
+    [],
+  );
   const skipRollover = useCallback(
     (through: string) =>
       setPlan((p) => ({ ...p, autopilot: { ...p.autopilot, rolledThrough: through } })),
@@ -295,6 +313,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       approvePlan,
       unapprovePlan,
       runRollover,
+      runRhythm,
       skipRollover,
       reset,
     }),
@@ -323,6 +342,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       approvePlan,
       unapprovePlan,
       runRollover,
+      runRhythm,
       skipRollover,
       reset,
     ],
