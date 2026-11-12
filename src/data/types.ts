@@ -122,6 +122,8 @@ export type Autopilot = {
   rolledThrough?: string;
   /** The Monday of the last week whose rhythm sessions were created. */
   rhythmWeek?: string;
+  /** The Monday of the last week set up by the Sunday reset (or skipped). */
+  resetWeek?: string;
 };
 
 export type PlanData = {

@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-import { planMorningNotifications } from './morning';
+import { planMorningNotifications, planResetNotification } from './morning';
 import { planNotifications } from './plan';
 import type { PlanData } from '../data/types';
 
@@ -59,7 +59,22 @@ export async function syncNotifications(plan: PlanData, now = new Date()): Promi
   if (!(await ensurePermission())) return 0;
   await Notifications.cancelAllScheduledNotificationsAsync();
   const mornings = planMorningNotifications(plan, now);
-  const items = planNotifications(plan, now).slice(0, MAX_PENDING - mornings.length);
+  const reset = planResetNotification(plan, now);
+  const items = planNotifications(plan, now).slice(
+    0,
+    MAX_PENDING - mornings.length - (reset ? 1 : 0),
+  );
+  if (reset) {
+    await Notifications.scheduleNotificationAsync({
+      identifier: reset.key,
+      content: { title: reset.title, body: reset.body, data: { reset: reset.date } },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: reset.at,
+        channelId: CHANNEL,
+      },
+    });
+  }
   for (const m of mornings) {
     await Notifications.scheduleNotificationAsync({
       identifier: m.key,
@@ -93,5 +108,5 @@ export async function syncNotifications(plan: PlanData, now = new Date()): Promi
       },
     });
   }
-  return items.length + mornings.length;
+  return items.length + mornings.length + (reset ? 1 : 0);
 }

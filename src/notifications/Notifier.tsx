@@ -1,4 +1,5 @@
 import * as Notifications from 'expo-notifications';
+import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import { usePlan } from '../store';
@@ -34,7 +35,11 @@ export function Notifier() {
     setupNotifications().catch(() => {});
     const sub = Notifications.addNotificationResponseReceivedListener((res) => {
       const data = res.notification.request.content.data as
-        { reminderId?: string; day?: number; planDate?: string } | undefined;
+        { reminderId?: string; day?: number; planDate?: string; reset?: string } | undefined;
+      if (data?.reset) {
+        router.push('/reset');
+        return;
+      }
       if (data?.planDate) {
         if (res.actionIdentifier === ACTION_APPROVE) actions.current.approvePlan(new Date());
         return;

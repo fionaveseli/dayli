@@ -13,8 +13,9 @@ import { CHAPTERS0, GOALS0, MILESTONES0, SAMPLE_PLAN } from '../data/sample';
 import { moveTask as moveT, placeTask as placeT, unplaceTask as unplaceT } from '../rules/calendar';
 import { dateKey, rolloverFor } from '../rules/autopilot';
 import { rhythmFor } from '../rules/rhythm';
+import { applyReset, type SlipChoice } from '../rules/reset';
 import { snoozeReminder as snoozeR } from '../notifications/plan';
-import { mondayKey } from '../sync/dates';
+import { addKey, mondayKey } from '../sync/dates';
 import { fromView, migrateWeekPlan, toView, type DatedPlan } from '../sync/dated';
 import type {
   Chapter,
@@ -86,6 +87,10 @@ export type PlanStore = PlanData & {
   runRhythm: (now: Date) => void;
   /** Mark ended days as handled without moving anything. */
   skipRollover: (through: string) => void;
+  /** Approve the Sunday reset: what slipped is handled and next week is set up. */
+  approveReset: (now: Date, choices: Record<string, SlipChoice>) => void;
+  /** Skip the Sunday reset this week. */
+  skipReset: () => void;
   reset: () => void;
 };
 
@@ -281,6 +286,27 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       setPlan((p) => ({ ...p, autopilot: { ...p.autopilot, rolledThrough: through } })),
     [setPlan],
   );
+  const approveReset = useCallback(
+    (now: Date, choices: Record<string, SlipChoice>) =>
+      setDated((d) =>
+        applyReset(
+          d,
+          thisMonday(),
+          now,
+          choices,
+          () => `t${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+        ),
+      ),
+    [],
+  );
+  const skipReset = useCallback(
+    () =>
+      setDated((d) => ({
+        ...d,
+        autopilot: { ...d.autopilot, resetWeek: addKey(thisMonday(), 7) },
+      })),
+    [],
+  );
   const reset = useCallback(() => setDated(initial()), []);
 
   const value = useMemo(
@@ -315,6 +341,8 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       runRollover,
       runRhythm,
       skipRollover,
+      approveReset,
+      skipReset,
       reset,
     }),
     [
@@ -344,6 +372,8 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       runRollover,
       runRhythm,
       skipRollover,
+      approveReset,
+      skipReset,
       reset,
     ],
   );
