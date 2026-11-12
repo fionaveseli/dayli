@@ -45,6 +45,13 @@ export default function MoreScreen() {
         </Card>
         <Card>
           <View style={{ gap: 10 }}>
+            <Text variant="h3">Sunday reset</Text>
+            <Text tone="muted">What slipped this week, and next week proposed.</Text>
+            <Button label="Open the reset" kind="secondary" onPress={() => router.push('/reset')} />
+          </View>
+        </Card>
+        <Card>
+          <View style={{ gap: 10 }}>
             <Text variant="h3">Goals and milestones</Text>
             <Text tone="muted">Steps toward the bigger things.</Text>
             <Button label="Open goals" kind="secondary" onPress={() => router.push('/goals')} />
