@@ -9,6 +9,7 @@ import { spacing, useTheme } from '../theme';
 import { useEditor } from '../editor';
 import { MorningPlan, RolloverAsk } from '../autopilot';
 import { QuickAdd } from '../quickadd';
+import { ResetCard } from '../reset';
 import { usePlan } from '../store';
 import { FixedRow, ReminderRow, TaskRow } from './rows';
 import { Timeline } from './Timeline';
@@ -86,6 +87,7 @@ export function TodayChecklist({ now }: { now?: Date }) {
 
         <RolloverAsk now={clock} />
         <MorningPlan day={day} now={clock} />
+        <ResetCard now={clock} />
 
         <Card style={{ gap: 4 }} accessibilityLabel="Don't forget">
           <SectionHead
