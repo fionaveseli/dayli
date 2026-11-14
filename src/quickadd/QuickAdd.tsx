@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { TextInput, View } from 'react-native';
 
 import { Button, Text } from '../components';
 import type { DayIndex } from '../data/types';
 import { usePlan } from '../store';
 import { fonts, hit, radii, useTheme } from '../theme';
+import { asLine, clock, MicButton, useVoiceNote } from '../voice';
 import { quickAdd } from './quickAddText';
 
 const PLACEHOLDER = 'Add something, or "remind me at 4 to…"';
@@ -24,6 +25,18 @@ export function QuickAdd({
   const plan = usePlan();
   const [value, setValue] = useState('');
   const [message, setMessage] = useState('');
+  // The transcript lands in the field so it can be checked before Add.
+  const heard = useCallback((t: string) => {
+    setValue(asLine(t));
+    setMessage('Check what I heard, then tap Add.');
+  }, []);
+  const voice = useVoiceNote(heard);
+  const hint =
+    voice.status === 'recording'
+      ? `Listening… ${clock(voice.secs)} · tap ✓ to finish`
+      : voice.status === 'transcribing'
+        ? 'Writing down what you said…'
+        : (voice.error ?? message);
 
   const submit = () => {
     const r = quickAdd(plan, value, { day, remOnly });
@@ -46,7 +59,7 @@ export function QuickAdd({
           borderRadius: radii.md,
           backgroundColor: c.card,
           paddingLeft: 14,
-          paddingRight: 6,
+          paddingRight: 4,
         }}
       >
         <Ionicons name="add" size={18} color={c.muted} />
@@ -69,11 +82,15 @@ export function QuickAdd({
             fontSize: 15,
           }}
         />
-        {value.trim() !== '' && <Button label="Add" onPress={submit} />}
+        {value.trim() !== '' && voice.status === 'idle' ? (
+          <Button label="Add" onPress={submit} />
+        ) : (
+          <MicButton status={voice.status} secs={voice.secs} onPress={voice.toggle} />
+        )}
       </View>
-      {message !== '' && (
+      {hint !== '' && (
         <Text variant="small" tone="muted" accessibilityLiveRegion="polite">
-          {message}
+          {hint}
         </Text>
       )}
     </View>
