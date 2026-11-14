@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -25,8 +26,14 @@ import {
 import { CATS, DAYF, daysLabel, fmtD, fmtT } from '../src/rules';
 import { usePlan } from '../src/store';
 import { fonts, radii, toneColors, useTheme } from '../src/theme';
+import { VoiceRecorder } from '../src/voice';
 
 type Step = 'write' | 'reading' | 'review';
+type Mode = 'type' | 'voice';
+const MODES: { value: Mode; icon: 'create-outline' | 'mic-outline'; label: string }[] = [
+  { value: 'type', icon: 'create-outline', label: 'Type my routine' },
+  { value: 'voice', icon: 'mic-outline', label: 'Record a voice note' },
+];
 const READING = [
   'Finding your fixed hours',
   'Counting the free time around them',
@@ -40,7 +47,11 @@ export default function OnboardingScreen() {
   const store = usePlan();
   const { setDone } = useOnboarded();
   const [step, setStep] = useState<Step>('write');
+  const [mode, setMode] = useState<Mode>('type');
   const [text, setText] = useState('');
+  // Voice: the transcript, once there is one. It is shown for editing before it is used.
+  const [heard, setHeard] = useState<string | null>(null);
+  const words = mode === 'voice' ? (heard ?? '') : text;
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
@@ -56,7 +67,7 @@ export default function OnboardingScreen() {
     setTick(0);
     setStep('reading');
     try {
-      setRoutine(await readRoutine(text.trim()));
+      setRoutine(await readRoutine(words.trim()));
       setStep('review');
     } catch (e) {
       setError(e instanceof RoutineError ? e.message : 'Something went wrong. Try again.');
@@ -117,33 +128,97 @@ export default function OnboardingScreen() {
           </Text>
           <Text variant="h1">Tell me what your life looks like.</Text>
           <Text tone="ink2">
-            Write it the way you&apos;d tell a friend: your work hours, classes, workouts, side
-            projects. I&apos;ll sort what&apos;s fixed from what can move.
+            Write it or say it the way you&apos;d tell a friend: your work hours, classes, workouts,
+            side projects. I&apos;ll sort what&apos;s fixed from what can move.
           </Text>
-          <TextInput
-            value={text}
-            onChangeText={setText}
-            multiline
-            textAlignVertical="top"
-            accessibilityLabel="Describe your week"
-            placeholder={
-              'For example: "I work 9 to 5, Monday to Friday. I want to go to the gym four times a week and work on my portfolio twice a week."'
-            }
-            placeholderTextColor={c.faint}
-            style={[styles.input, { backgroundColor: c.card, borderColor: c.line2, color: c.ink }]}
-          />
-          <Text variant="small" tone="muted">
-            Mention fixed hours and how often you&apos;d like to do things.
-          </Text>
+          <View
+            accessibilityRole="tablist"
+            accessibilityLabel="How do you want to tell Dayli"
+            style={styles.modes}
+          >
+            {MODES.map((m) => {
+              const on = mode === m.value;
+              return (
+                <Pressable
+                  key={m.value}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: on }}
+                  onPress={() => setMode(m.value)}
+                  style={[
+                    styles.mode,
+                    { backgroundColor: c.card, borderColor: on ? c.ink : c.line },
+                    on && { borderWidth: 2, padding: 9 },
+                  ]}
+                >
+                  <Ionicons name={m.icon} size={18} color={on ? c.ink : c.muted} />
+                  <Text variant="small" style={{ fontFamily: fonts.uiSemi, flex: 1 }}>
+                    {m.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          {mode === 'type' ? (
+            <>
+              <TextInput
+                value={text}
+                onChangeText={setText}
+                multiline
+                textAlignVertical="top"
+                accessibilityLabel="Describe your week"
+                placeholder={
+                  'For example: "I work 9 to 5, Monday to Friday. I want to go to the gym four times a week and work on my portfolio twice a week."'
+                }
+                placeholderTextColor={c.faint}
+                style={[
+                  styles.input,
+                  { backgroundColor: c.card, borderColor: c.line2, color: c.ink },
+                ]}
+              />
+              <Text variant="small" tone="muted">
+                Mention fixed hours and how often you&apos;d like to do things.
+              </Text>
+            </>
+          ) : heard === null ? (
+            <VoiceRecorder onText={setHeard} />
+          ) : (
+            <View style={{ gap: 8 }}>
+              <Text variant="label" tone="muted">
+                What I heard
+              </Text>
+              <TextInput
+                value={heard}
+                onChangeText={setHeard}
+                multiline
+                textAlignVertical="top"
+                accessibilityLabel="Transcript"
+                style={[
+                  styles.input,
+                  { minHeight: 160, backgroundColor: c.card, borderColor: c.line2, color: c.ink },
+                ]}
+              />
+              <Text variant="small" tone="muted">
+                Fix anything I misheard before building your week.
+              </Text>
+              <View style={{ alignSelf: 'flex-start' }}>
+                <Button
+                  label="Record again"
+                  kind="ghost"
+                  size="sm"
+                  onPress={() => setHeard(null)}
+                />
+              </View>
+            </View>
+          )}
           {error && <Text tone="ink2">{error}</Text>}
-          {!text && (
+          {mode === 'type' && !text && (
             <Button label="Use an example" kind="soft" size="sm" onPress={() => setText(EXAMPLE)} />
           )}
           <Button
             label="Build my week"
             size="lg"
             block
-            disabled={text.trim().length < 8}
+            disabled={words.trim().length < 8}
             onPress={build}
           />
           <View style={{ alignItems: 'center' }}>
@@ -319,6 +394,17 @@ function Review({
 
 const styles = StyleSheet.create({
   page: { padding: 20, gap: 14 },
+  modes: { flexDirection: 'row', gap: 8 },
+  mode: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    minHeight: 44,
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: radii.md,
+  },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 26, padding: 24 },
   input: {
     minHeight: 220,

@@ -22,7 +22,16 @@
       }
     },
     "web": { "favicon": "./assets/favicon.png" },
-    "plugins": ["expo-router", "expo-notifications"],
+    "plugins": [
+      "expo-router",
+      "expo-notifications",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Dayli uses the microphone for voice notes, so you can say your week instead of typing it."
+        }
+      ]
+    ],
     "experiments": { "typedRoutes": true }
   }
 }
