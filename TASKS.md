@@ -67,7 +67,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 - [x] **22 Weekly rhythms.** "Gym 4× a week" creates its sessions on the lightest days each week; move one and the rest stay.
 - [x] **23 Sunday reset.** A two-minute weekly review: what slipped, next week proposed, approve.
 - [x] **24 Voice notes.** Speak your week in onboarding and in quick add; the transcript is shown before it's used.
-- [ ] **25 CSV import.** Bring in a timetable or calendar export as fixed commitments.
+- [x] **25 CSV import.** Bring in a timetable or calendar export as fixed commitments.
 - [ ] **26 Smarter nudges.** "You have a free hour now and the case study fits", only during open time and never in protected evenings.
 - [ ] **27 Stuck tasks.** A task that rolled over three times asks whether it still matters.
 
