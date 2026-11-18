@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Card, Text } from '../src/components';
 import {
   applyRoutine,
+  EMPTY_ROUTINE,
   EXAMPLE,
   readRoutine,
   routineIssues,
@@ -23,16 +24,29 @@ import {
   useOnboarded,
   type Routine,
 } from '../src/onboarding';
+import {
+  addImported,
+  CsvPicker,
+  whenLabel,
+  type ImportedFixed,
+  type PickedFile,
+} from '../src/import';
 import { CATS, DAYF, daysLabel, fmtD, fmtT } from '../src/rules';
 import { usePlan } from '../src/store';
+import { mondayKey } from '../src/sync/dates';
 import { fonts, radii, toneColors, useTheme } from '../src/theme';
 import { VoiceRecorder } from '../src/voice';
 
 type Step = 'write' | 'reading' | 'review';
-type Mode = 'type' | 'voice';
-const MODES: { value: Mode; icon: 'create-outline' | 'mic-outline'; label: string }[] = [
+type Mode = 'type' | 'voice' | 'csv';
+const MODES: {
+  value: Mode;
+  icon: 'create-outline' | 'mic-outline' | 'cloud-upload-outline';
+  label: string;
+}[] = [
   { value: 'type', icon: 'create-outline', label: 'Type my routine' },
   { value: 'voice', icon: 'mic-outline', label: 'Record a voice note' },
+  { value: 'csv', icon: 'cloud-upload-outline', label: 'Import a CSV' },
 ];
 const READING = [
   'Finding your fixed hours',
@@ -52,6 +66,7 @@ export default function OnboardingScreen() {
   // Voice: the transcript, once there is one. It is shown for editing before it is used.
   const [heard, setHeard] = useState<string | null>(null);
   const words = mode === 'voice' ? (heard ?? '') : text;
+  const [file, setFile] = useState<PickedFile | null>(null);
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
@@ -64,6 +79,12 @@ export default function OnboardingScreen() {
 
   const build = async () => {
     setError(null);
+    if (mode === 'csv') {
+      if (!file) return;
+      setRoutine({ ...EMPTY_ROUTINE, text: file.name, fixed: file.fixed });
+      setStep('review');
+      return;
+    }
     setTick(0);
     setStep('reading');
     try {
@@ -78,7 +99,13 @@ export default function OnboardingScreen() {
   const approve = () => {
     if (!routine) return;
     const today = (new Date().getDay() + 6) % 7;
-    store.apply((p) => applyRoutine(p, routine, today));
+    if (mode === 'csv') {
+      // Imported commitments keep their own dates, so they go straight into the dated plan.
+      store.apply((p) => applyRoutine(p, EMPTY_ROUTINE, today));
+      store.setDated(
+        (d) => addImported(d, routine.fixed as ImportedFixed[], mondayKey(new Date())).plan,
+      );
+    } else store.apply((p) => applyRoutine(p, routine, today));
     setDone(true);
     router.replace('/');
   };
@@ -110,6 +137,7 @@ export default function OnboardingScreen() {
     return (
       <Review
         routine={routine}
+        fromFile={mode === 'csv'}
         setRoutine={setRoutine}
         onApprove={approve}
         onBack={() => setStep('write')}
@@ -179,6 +207,8 @@ export default function OnboardingScreen() {
                 Mention fixed hours and how often you&apos;d like to do things.
               </Text>
             </>
+          ) : mode === 'csv' ? (
+            <CsvPicker file={file} onChange={setFile} />
           ) : heard === null ? (
             <VoiceRecorder onText={setHeard} />
           ) : (
@@ -218,7 +248,7 @@ export default function OnboardingScreen() {
             label="Build my week"
             size="lg"
             block
-            disabled={words.trim().length < 8}
+            disabled={mode === 'csv' ? !file?.fixed.length : words.trim().length < 8}
             onPress={build}
           />
           <View style={{ alignItems: 'center' }}>
@@ -232,11 +262,13 @@ export default function OnboardingScreen() {
 
 function Review({
   routine,
+  fromFile,
   setRoutine,
   onApprove,
   onBack,
 }: {
   routine: Routine;
+  fromFile: boolean;
   setRoutine: (r: Routine) => void;
   onApprove: () => void;
   onBack: () => void;
@@ -297,7 +329,7 @@ function Review({
 
         <Card style={{ gap: 6 }}>
           <Text variant="label" tone="muted">
-            What I heard
+            {fromFile ? 'From your file' : 'What I heard'}
           </Text>
           <Text tone="ink2">{routine.text}</Text>
         </Card>
@@ -308,7 +340,7 @@ function Review({
           row(
             f.id,
             f.title,
-            `${daysLabel(f.days)} · ${fmtT(f.start)}–${fmtT(f.end)}${f.where ? ' · ' + f.where : ''}`,
+            `${fromFile ? whenLabel(f as ImportedFixed) : `${daysLabel(f.days)} · ${fmtT(f.start)}–${fmtT(f.end)}`}${f.where ? ' · ' + f.where : ''}`,
             toneColors(c, CATS[f.cat].tone),
             () => setRoutine({ ...routine, fixed: routine.fixed.filter((x) => x.id !== f.id) }),
           ),
@@ -394,9 +426,10 @@ function Review({
 
 const styles = StyleSheet.create({
   page: { padding: 20, gap: 14 },
-  modes: { flexDirection: 'row', gap: 8 },
+  modes: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   mode: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: '45%',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
