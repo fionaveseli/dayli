@@ -35,7 +35,12 @@ export function Notifier() {
     setupNotifications().catch(() => {});
     const sub = Notifications.addNotificationResponseReceivedListener((res) => {
       const data = res.notification.request.content.data as
-        { reminderId?: string; day?: number; planDate?: string; reset?: string } | undefined;
+        | { reminderId?: string; day?: number; planDate?: string; reset?: string; nudge?: string }
+        | undefined;
+      if (data?.nudge) {
+        router.navigate('/');
+        return;
+      }
       if (data?.reset) {
         router.push('/reset');
         return;

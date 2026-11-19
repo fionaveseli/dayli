@@ -1,6 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { planMorningNotifications, planResetNotification } from './morning';
+import { planNudgeNotifications } from './nudges';
 import { planNotifications } from './plan';
 import type { PlanData } from '../data/types';
 
@@ -60,10 +61,22 @@ export async function syncNotifications(plan: PlanData, now = new Date()): Promi
   await Notifications.cancelAllScheduledNotificationsAsync();
   const mornings = planMorningNotifications(plan, now);
   const reset = planResetNotification(plan, now);
+  const nudges = planNudgeNotifications(plan, now);
   const items = planNotifications(plan, now).slice(
     0,
-    MAX_PENDING - mornings.length - (reset ? 1 : 0),
+    MAX_PENDING - mornings.length - nudges.length - (reset ? 1 : 0),
   );
+  for (const n of nudges) {
+    await Notifications.scheduleNotificationAsync({
+      identifier: n.key,
+      content: { title: n.title, body: n.body, data: { nudge: n.taskId } },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: n.at,
+        channelId: CHANNEL,
+      },
+    });
+  }
   if (reset) {
     await Notifications.scheduleNotificationAsync({
       identifier: reset.key,
@@ -108,5 +121,5 @@ export async function syncNotifications(plan: PlanData, now = new Date()): Promi
       },
     });
   }
-  return items.length + mornings.length + (reset ? 1 : 0);
+  return items.length + mornings.length + nudges.length + (reset ? 1 : 0);
 }
