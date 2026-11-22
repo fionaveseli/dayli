@@ -102,3 +102,31 @@ describe('TodayChecklist morning plan', () => {
     await waitFor(() => expect(getByText('Your plan for today')).toBeTruthy());
   });
 });
+
+describe('TodayChecklist nudge', () => {
+  const renderAt = (now: Date) =>
+    render(
+      <ThemeProvider scheme="light">
+        <PlanProvider>
+          <EditorProvider>
+            <TodayChecklist now={now} />
+          </EditorProvider>
+        </PlanProvider>
+      </ThemeProvider>,
+    );
+
+  it('offers a task that fits the free time now and places it', async () => {
+    const { getByText, queryByText } = await renderAt(new Date(2026, 9, 26, 7, 0));
+    await waitFor(() => expect(getByText('You have 2h free now')).toBeTruthy());
+    const line = 'Build portfolio homepage fits (2h). Free until 09:00.';
+    expect(getByText(line)).toBeTruthy();
+    await fireEvent.press(getByText('Start it now'));
+    await waitFor(() => expect(queryByText(line)).toBeNull());
+  });
+
+  it('stays quiet during fixed time', async () => {
+    const { queryByText, getByText } = await renderToday();
+    await waitFor(() => expect(getByText('Good morning')).toBeTruthy());
+    expect(queryByText(/free now$/)).toBeNull();
+  });
+});
