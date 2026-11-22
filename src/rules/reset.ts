@@ -65,7 +65,13 @@ export function proposeWeek(
       const r = (i.planned + t.dur) / i.free;
       if (!best || r < best.r) best = { day, r, room };
     }
-    const moved: Task = { ...t, day: best ? best.day : null, time: null, rolled: true };
+    const moved: Task = {
+      ...t,
+      day: best ? best.day : null,
+      time: null,
+      rolled: true,
+      rolls: (t.rolls ?? 0) + 1,
+    };
     tasks = [...tasks, moved];
     moves.push({
       t,
@@ -134,7 +140,7 @@ export function applyReset(
     else if (moved.has(t.id)) {
       const to = moved.get(t.id)!;
       const date = to == null ? null : addKey(nextMonday, to);
-      tasks.push({ ...t, date, time: null, rolled: true });
+      tasks.push({ ...t, date, time: null, rolled: true, rolls: (t.rolls ?? 0) + 1 });
     } else tasks.push(t);
   }
   for (const s of proposal.sessions) {

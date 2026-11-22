@@ -154,6 +154,7 @@ export function toRows(p: DatedPlan): Row[] {
         pri: t.pri,
         repeat: t.repeat,
         rolled: t.rolled ?? false,
+        rolls: t.rolls ?? 0,
       },
     });
   return rows;
@@ -247,6 +248,7 @@ export function fromRows(db: Record<Table, DbRow[]>): DatedPlan {
       pri: r.pri as number,
       repeat: r.repeat as boolean,
       ...(r.rolled ? { rolled: true } : {}),
+      ...(r.rolls ? { rolls: r.rolls as number } : {}),
       ...metaOf(r),
     })),
   };
