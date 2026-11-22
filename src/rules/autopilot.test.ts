@@ -1,5 +1,13 @@
 import { SAMPLE_PLAN } from '../data/sample';
-import { dateKey, planLine, planSummary, rolloverFor } from './autopilot';
+import {
+  dateKey,
+  decideStuck,
+  planLine,
+  planSummary,
+  rolloverFor,
+  stuckOn,
+  stuckText,
+} from './autopilot';
 import type { PlanData } from '../data/types';
 
 const unfinishedToday = SAMPLE_PLAN.tasks.filter((t) => t.day === 0 && !t.done);
@@ -61,5 +69,37 @@ describe('rolloverFor', () => {
       new Date(2026, 9, 26, 23, 45),
     );
     expect(r.through).toBeNull();
+  });
+});
+
+describe('stuck tasks', () => {
+  const a3 = SAMPLE_PLAN.tasks.find((t) => t.id === 'a3')!;
+
+  it('counts each move forward', () => {
+    const r = rolloverFor(SAMPLE_PLAN, new Date(2026, 9, 26, 23, 45));
+    const moved = r.tasks.filter((t) => r.moves.some((m) => m.t.id === t.id));
+    for (const t of moved) {
+      const before = SAMPLE_PLAN.tasks.find((x) => x.id === t.id)!;
+      expect(t.rolls).toBe((before.rolls ?? 0) + 1);
+    }
+  });
+
+  it('asks about a task that rolled three times, not one that rolled less', () => {
+    expect(stuckOn(SAMPLE_PLAN, 0).map((t) => t.id)).toEqual(['a3']);
+    const fewer = { ...SAMPLE_PLAN, tasks: decideStuck(SAMPLE_PLAN.tasks, 'a3', 'keep') };
+    expect(stuckOn(fewer, 0)).toHaveLength(0);
+    expect(stuckText(a3).body).toBe(
+      'Build portfolio homepage has moved forward 3 times without getting done.',
+    );
+  });
+
+  it('keeps it, sends it to the brain dump, or lets it go', () => {
+    const keep = decideStuck(SAMPLE_PLAN.tasks, 'a3', 'keep').find((t) => t.id === 'a3')!;
+    expect(keep).toMatchObject({ day: 0, rolls: 0 });
+    const dump = decideStuck(SAMPLE_PLAN.tasks, 'a3', 'dump').find((t) => t.id === 'a3')!;
+    expect(dump).toMatchObject({ day: null, time: null, rolls: 0 });
+    const drop = decideStuck(SAMPLE_PLAN.tasks, 'a3', 'drop');
+    expect(drop.find((t) => t.id === 'a3')).toBeUndefined();
+    expect(drop).toHaveLength(SAMPLE_PLAN.tasks.length - 1);
   });
 });
