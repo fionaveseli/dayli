@@ -29,6 +29,8 @@ export type Task = {
   pri: number;
   repeat: boolean;
   rolled?: boolean;
+  /** How many times it has moved forward unfinished since the user last decided on it. */
+  rolls?: number;
 };
 
 export type Reminder = {

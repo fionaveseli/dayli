@@ -120,6 +120,7 @@ export const TASKS0: Task[] = [
   }),
   T('a3', 'Build portfolio homepage', 'portfolio', 120, 0, {
     rolled: true,
+    rolls: 3,
     goal: 'g1',
     ms: 'm1',
     pri: 3,

@@ -69,7 +69,7 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 - [x] **24 Voice notes.** Speak your week in onboarding and in quick add; the transcript is shown before it's used.
 - [x] **25 CSV import.** Bring in a timetable or calendar export as fixed commitments.
 - [x] **26 Smarter nudges.** "You have a free hour now and the case study fits", only during open time and never in protected evenings.
-- [ ] **27 Stuck tasks.** A task that rolled over three times asks whether it still matters.
+- [x] **27 Stuck tasks.** A task that rolled over three times asks whether it still matters.
 
 # v3 — feels native
 

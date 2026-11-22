@@ -127,6 +127,35 @@ export function rolloverFor(plan: PlanData, now: Date): RolloverResult {
 export function applyMoves(tasks: Task[], moves: RolloverMove[]): Task[] {
   return tasks.map((t) => {
     const m = moves.find((x) => x.t.id === t.id);
-    return m ? { ...t, day: m.to, time: null, rolled: true } : t;
+    return m ? { ...t, day: m.to, time: null, rolled: true, rolls: (t.rolls ?? 0) + 1 } : t;
   });
+}
+
+/** After this many moves forward, a task asks whether it still matters. */
+export const STUCK_AFTER = 3;
+
+/** Unfinished tasks on a day that have rolled over too often. */
+export function stuckOn(S: PlanData, d: DayIndex): Task[] {
+  return S.tasks.filter((t) => t.day === d && !t.done && (t.rolls ?? 0) >= STUCK_AFTER);
+}
+
+export function stuckText(t: Task) {
+  return {
+    title: 'Does this still matter?',
+    body: `${t.title} has moved forward ${t.rolls ?? 0} times without getting done.`,
+  };
+}
+
+export type StuckChoice = 'keep' | 'dump' | 'drop';
+
+/** Keep it where it is, send it to the brain dump, or let it go. Each choice starts the count again. */
+export function decideStuck(tasks: Task[], id: string, c: StuckChoice): Task[] {
+  if (c === 'drop') return tasks.filter((t) => t.id !== id);
+  return tasks.map((t) =>
+    t.id !== id
+      ? t
+      : c === 'keep'
+        ? { ...t, rolls: 0 }
+        : { ...t, day: null, time: null, rolls: 0, rolled: false },
+  );
 }

@@ -130,3 +130,27 @@ describe('TodayChecklist nudge', () => {
     expect(queryByText(/free now$/)).toBeNull();
   });
 });
+
+describe('TodayChecklist stuck task', () => {
+  const ask =
+    'Build portfolio homepage has moved forward 3 times without getting done. It needs 2h.';
+
+  it('asks whether a task that keeps rolling still matters, and keeps it', async () => {
+    const { getByText, queryByText } = await renderToday();
+    await waitFor(() => expect(getByText('Does this still matter?')).toBeTruthy());
+    expect(getByText(ask)).toBeTruthy();
+    await fireEvent.press(getByText('Keep it today'));
+    await waitFor(() => expect(queryByText(ask)).toBeNull());
+    await fireEvent.press(getByText('Checklist'));
+    expect(getByText('Build portfolio homepage')).toBeTruthy();
+  });
+
+  it('lets it go', async () => {
+    const { getByText, queryByText } = await renderToday();
+    await waitFor(() => expect(getByText('Does this still matter?')).toBeTruthy());
+    await fireEvent.press(getByText('Let it go'));
+    await waitFor(() => expect(queryByText('Does this still matter?')).toBeNull());
+    await fireEvent.press(getByText('Checklist'));
+    expect(queryByText('Build portfolio homepage')).toBeNull();
+  });
+});
