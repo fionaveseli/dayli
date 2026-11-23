@@ -73,7 +73,9 @@ The app works locally (on the phone, with sample data) until Supabase is connect
 
 # v3 — feels native
 
-- [ ] **28 Home screen widgets.** Today's next thing and Don't forget, on iPhone and Android.
+- [ ] **28 [needs you] Home screen widgets.** Today's next thing and Don't forget, on iPhone and Android.
+      Done: what the widgets show (`src/rules/widget.ts`), the data the app hands them (`src/widgets`), and an in-app preview (More → Home screen widgets).
+      Needs you: approve the two native widget libraries named in the Task 28 pull request. Then remove **[needs you]** here and the next session builds the native widgets.
 - [ ] **29 Lock screen alert for leaving.** The time-to-leave countdown on the lock screen (Live Activity on iPhone).
 - [ ] **30 Calendar sync.** Read Apple and Google calendars as fixed commitments.
 - [ ] **31 Travel time.** Leave alerts use the real journey time instead of a fixed buffer.

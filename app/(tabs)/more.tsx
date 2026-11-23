@@ -70,6 +70,17 @@ export default function MoreScreen() {
         </Card>
         <Card>
           <View style={{ gap: 10 }}>
+            <Text variant="h3">Home screen widgets</Text>
+            <Text tone="muted">Your next thing and Don&apos;t forget, at a glance.</Text>
+            <Button
+              label="See the widgets"
+              kind="secondary"
+              onPress={() => router.push('/widgets')}
+            />
+          </View>
+        </Card>
+        <Card>
+          <View style={{ gap: 10 }}>
             <Text variant="h3">Import a CSV</Text>
             <Text tone="muted">Timetables, calendar exports.</Text>
             <Button label="Import a file" kind="secondary" onPress={() => router.push('/import')} />

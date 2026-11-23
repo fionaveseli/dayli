@@ -21,6 +21,7 @@ import { OnboardedProvider } from '../src/onboarding';
 import { PlanProvider, usePlan } from '../src/store';
 import { AuthProvider, SyncProvider } from '../src/sync';
 import { ThemeProvider, useTheme } from '../src/theme';
+import { WidgetSync } from '../src/widgets';
 
 function Shell() {
   const { dark, colors } = useTheme();
@@ -63,6 +64,7 @@ export default function RootLayout() {
             <SyncProvider>
               <EditorProvider>
                 <Notifier />
+                <WidgetSync />
                 <Autopilot />
                 <Shell />
               </EditorProvider>
