@@ -8,3 +8,4 @@ export * from './chapters';
 export * from './rhythm';
 export * from './reset';
 export * from './nudges';
+export * from './widget';
